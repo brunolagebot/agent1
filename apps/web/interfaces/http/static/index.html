@@ -567,12 +567,16 @@
         return;
       }
 
-      list.innerHTML = conversations.slice(0, 30).map(conv => `
-        <div class="conversation-item ${conv.id === conversationId ? 'active' : ''}" onclick="loadConversation('${conv.id}')">
-          <div class="conversation-title">${conv.title || 'Nova conversa'}</div>
-          <div class="conversation-date">${new Date(conv.createdAt).toLocaleDateString('pt-BR')}</div>
-        </div>
-      `).join('');
+      list.innerHTML = conversations.slice(0, 30).map(conv => {
+        const isActive = conv.id === conversationId ? 'active' : '';
+        const title = conv.title || 'Nova conversa';
+        const date = new Date(conv.createdAt).toLocaleDateString('pt-BR');
+        
+        return '<div class="conversation-item ' + isActive + '" onclick="loadConversation(\'' + conv.id + '\')">' +
+          '<div class="conversation-title">' + title + '</div>' +
+          '<div class="conversation-date">' + date + '</div>' +
+        '</div>';
+      }).join('');
     }
 
     async function loadConversation(id) {
@@ -580,7 +584,7 @@
         conversationId = id;
         renderConversationsList();
 
-        const res = await fetch(\`/api/conversations/\${id}/messages\`);
+        const res = await fetch('/api/conversations/' + id + '/messages');
         const data = await res.json();
         
         document.getElementById('messages').innerHTML = '';
@@ -603,12 +607,12 @@
       const stagesDiv = document.getElementById('telemetryStages');
       box.classList.add('active');
       
-      stagesDiv.innerHTML = stages.map((stage, idx) => 
-        \`<div class="stage-item pending" id="stage-\${stage.key}">
-          <span>\${idx + 1}. \${stage.label}</span>
-          <span class="stage-time">aguardando</span>
-        </div>\`
-      ).join('');
+      stagesDiv.innerHTML = stages.map((stage, idx) => {
+        return '<div class="stage-item pending" id="stage-' + stage.key + '">' +
+          '<span>' + (idx + 1) + '. ' + stage.label + '</span>' +
+          '<span class="stage-time">aguardando</span>' +
+        '</div>';
+      }).join('');
     }
 
     function hideTelemetry() {
@@ -616,7 +620,7 @@
     }
 
     function updateStage(stageKey, status, duration = null) {
-      const el = document.getElementById(\`stage-\${stageKey}\`);
+      const el = document.getElementById('stage-' + stageKey);
       if (!el) return;
       
       el.className = \`stage-item \${status}\`;
@@ -625,9 +629,9 @@
       if (status === 'current') {
         stageStartTimes[stageKey] = Date.now();
         timeEl.textContent = 'processando...';
-      } else if (status === 'completed') {
+      } else       if (status === 'completed') {
         const elapsed = duration || (Date.now() - (stageStartTimes[stageKey] || Date.now()));
-        timeEl.textContent = \`✓ \${elapsed}ms\`;
+        timeEl.textContent = '✓ ' + elapsed + 'ms';
       }
     }
 
@@ -723,7 +727,7 @@
         if (data.error) throw new Error(data.error);
 
         conversationId = data.conversationId;
-        addMessage('assistant', data.assistantMessage, \`msg-\${Date.now()}\`);
+        addMessage('assistant', data.assistantMessage, 'msg-' + Date.now());
         
         if (data.telemetry) {
           Object.entries(data.telemetry.stages).forEach(([name, stageData]) => {
@@ -743,7 +747,7 @@
       } catch (error) {
         document.getElementById('progressBar').classList.remove('active');
         hideTelemetry();
-        addMessage('assistant', \`❌ Erro: \${error.message}\`);
+          addMessage('assistant', '❌ Erro: ' + error.message);
       } finally {
         sendBtn.disabled = false;
       }
@@ -771,10 +775,10 @@
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        showUploadStatus(\`✅ \${data.filename} processado (\${data.chunksCount} chunks)\`, 'success');
+        showUploadStatus('✅ ' + data.filename + ' processado (' + data.chunksCount + ' chunks)', 'success');
         fileInput.value = '';
       } catch (error) {
-        showUploadStatus(\`❌ \${error.message}\`, 'error');
+        showUploadStatus('❌ ' + error.message, 'error');
       }
     }
 
@@ -804,36 +808,31 @@
     async function loadAdminPanel() {
       const panel = document.getElementById('adminPanel');
       
-      panel.innerHTML = \`
-        <div class="admin-section">
-          <h4>📊 Estatísticas</h4>
-          <button class="admin-btn" onclick="showStats()">Ver Estatísticas do Sistema</button>
-          <div id="statsDisplay"></div>
-        </div>
-
-        <div class="admin-section">
-          <h4>🔍 Análise</h4>
-          <button class="admin-btn" onclick="analyzePerformance()">Análise de Performance</button>
-          <button class="admin-btn" onclick="analyzeLogs()">Análise de Logs</button>
-          <button class="admin-btn" onclick="showFeedbackStats()">Estatísticas de Feedback</button>
-        </div>
-
-        <div class="admin-section">
-          <h4>📥 Exportar</h4>
-          <button class="admin-btn" onclick="exportTraining()">Exportar Conversas (Fine-tuning)</button>
-          <button class="admin-btn" onclick="exportKnowledge()">Exportar Knowledge Base</button>
-        </div>
-
-        <div class="admin-section">
-          <h4>🤖 Modelos</h4>
-          <button class="admin-btn" onclick="listModels()">Listar Modelos Ollama</button>
-        </div>
-
-        <div class="admin-section">
-          <h4>📖 Versão</h4>
-          <button class="admin-btn" onclick="showVersion()">Ver Versão e Git Info</button>
-        </div>
-      \`;
+      panel.innerHTML = '' +
+        '<div class="admin-section">' +
+          '<h4>📊 Estatísticas</h4>' +
+          '<button class="admin-btn" onclick="showStats()">Ver Estatísticas do Sistema</button>' +
+          '<div id="statsDisplay"></div>' +
+        '</div>' +
+        '<div class="admin-section">' +
+          '<h4>🔍 Análise</h4>' +
+          '<button class="admin-btn" onclick="analyzePerformance()">Análise de Performance</button>' +
+          '<button class="admin-btn" onclick="analyzeLogs()">Análise de Logs</button>' +
+          '<button class="admin-btn" onclick="showFeedbackStats()">Estatísticas de Feedback</button>' +
+        '</div>' +
+        '<div class="admin-section">' +
+          '<h4>📥 Exportar</h4>' +
+          '<button class="admin-btn" onclick="exportTraining()">Exportar Conversas (Fine-tuning)</button>' +
+          '<button class="admin-btn" onclick="exportKnowledge()">Exportar Knowledge Base</button>' +
+        '</div>' +
+        '<div class="admin-section">' +
+          '<h4>🤖 Modelos</h4>' +
+          '<button class="admin-btn" onclick="listModels()">Listar Modelos Ollama</button>' +
+        '</div>' +
+        '<div class="admin-section">' +
+          '<h4>📖 Versão</h4>' +
+          '<button class="admin-btn" onclick="showVersion()">Ver Versão e Git Info</button>' +
+        '</div>';
     }
 
     async function showStats() {
@@ -841,15 +840,14 @@
         const res = await fetch('/api/system/stats');
         const data = await res.json();
         
-        document.getElementById('statsDisplay').innerHTML = \`
-          <div class="stats-box">
-            <div>Conversas: \${data.conversations}</div>
-            <div>Mensagens: \${data.messages}</div>
-            <div>Documentos: \${data.documents}</div>
-            <div>Fatos (KB): \${data.facts}</div>
-            <div>Feedback médio: \${data.feedback.average || 'N/A'} (\${data.feedback.count} avaliações)</div>
-          </div>
-        \`;
+        document.getElementById('statsDisplay').innerHTML =
+          '<div class="stats-box">' +
+            '<div>Conversas: ' + data.conversations + '</div>' +
+            '<div>Mensagens: ' + data.messages + '</div>' +
+            '<div>Documentos: ' + data.documents + '</div>' +
+            '<div>Fatos (KB): ' + data.facts + '</div>' +
+            '<div>Feedback médio: ' + (data.feedback.average || 'N/A') + ' (' + data.feedback.count + ' avaliações)</div>' +
+          '</div>';
       } catch (error) {
         alert('Erro ao buscar estatísticas: ' + error.message);
       }
@@ -897,7 +895,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = \`knowledge-base-\${new Date().toISOString().split('T')[0]}.json\`;
+        a.download = 'knowledge-base-' + new Date().toISOString().split('T')[0] + '.json';
         a.click();
       } catch (error) {
         alert('Erro: ' + error.message);
@@ -918,7 +916,7 @@
       try {
         const res = await fetch('/api/system/version');
         const data = await res.json();
-        showResultBox('Versão', \`Agent1 v\${data.version}\\nGit: \${data.gitTag}\\nCommit: \${data.gitCommit}\`);
+        showResultBox('Versão', 'Agent1 v' + data.version + '\nGit: ' + data.gitTag + '\nCommit: ' + data.gitCommit);
       } catch (error) {
         alert('Erro: ' + error.message);
       }
