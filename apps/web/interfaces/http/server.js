@@ -19,9 +19,17 @@ function requestListener(req, res) {
   const url = req.url || '/';
 
   if (url === '/' && req.method === 'GET') {
+    // Tentar index-simple.html primeiro (versão funcional garantida)
+    const simpleHtmlPath = path.join(__dirname, 'static', 'index-simple.html');
     const htmlPath = path.join(__dirname, 'static', 'index.html');
-    if (fs.existsSync(htmlPath)) {
-      const html = fs.readFileSync(htmlPath, 'utf-8');
+    
+    let filePath = simpleHtmlPath;
+    if (!fs.existsSync(simpleHtmlPath) && fs.existsSync(htmlPath)) {
+      filePath = htmlPath;
+    }
+    
+    if (fs.existsSync(filePath)) {
+      const html = fs.readFileSync(filePath, 'utf-8');
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(html);
     } else {
