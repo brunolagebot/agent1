@@ -1,0 +1,16 @@
+{"timestamp":"2025-10-19T19:05:54.002Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.016Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"14ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.017Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.018Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.019Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.020Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.020Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.318Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"298ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.318Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.332Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"14ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.333Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.333Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.334Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:06:32.354Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"38020ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:06:32.355Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:06:32.361Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"6ms","module":"telemetry"},"error":null}

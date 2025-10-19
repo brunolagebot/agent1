@@ -62,3 +62,6 @@
 {"timestamp":"2025-10-19T18:58:37.151Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
 {"timestamp":"2025-10-19T18:59:18.407Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
 {"timestamp":"2025-10-19T19:03:00.097Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T19:05:54.001Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":5,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:06:32.365Z","level":"info","message":"Operation completed: chat","context":{"totalDuration":"38359ms","stages":"create_conversation:14ms, save_user_message:1ms, load_history:1ms, search_documents:298ms, search_knowledge_base:14ms, prepare_context:0ms, llm_generation:38020ms, save_assistant_message:6ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:06:32.366Z","level":"info","message":"Chat response generated","context":{"conversationId":"049e8f58-8dab-4d50-8a83-d629ae1626d3","module":"routes/chat"},"error":null}
