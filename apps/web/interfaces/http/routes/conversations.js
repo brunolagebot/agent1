@@ -71,6 +71,9 @@ async function handleGetMessagesRoute(conversationId, req, res) {
         role: m.role,
         content: m.content,
         createdAt: m.createdAt,
+        feedbackScore: m.feedbackScore,
+        feedbackComment: m.feedbackComment,
+        feedbackAt: m.feedbackAt,
       }))
     }, null, 2));
   } catch (error) {

@@ -1,8 +1,8 @@
-# 📊 Estado Atual do Sistema - Agent1 v0.5.1
+# 📊 Estado Atual do Sistema - Agent1 v0.5.2
 
 **Data:** 2025-10-19  
-**Commit:** `896f69e`  
-**Status:** ✅ Totalmente funcional
+**Commit:** `v0.5.2`  
+**Status:** ✅ Totalmente funcional com sistema de feedback
 
 ---
 
@@ -30,13 +30,14 @@ curl http://web.localhost/api/system/stats
 ```
 
 ### Módulos Ativos:
-- ✅ **LLM:** Qwen2.5:14b (9GB, 16s-40s por resposta)
+- ✅ **LLM:** Qwen2.5:14b (9GB, 16s-40s por resposta) - **OTIMIZADO PARA OBJETIVIDADE**
 - ✅ **RAG:** PDF/TXT upload + busca semântica
 - ✅ **Knowledge Base:** Fatos permanentes (48% carcaça bovina)
 - ✅ **Telemetria:** 8 etapas rastreadas e cronometradas
 - ✅ **Logs:** Estruturados em JSON (./logs/)
 - ✅ **Performance:** Métricas no PostgreSQL
-- ✅ **Feedback:** 5 níveis armazenados
+- ✅ **Feedback:** Sistema completo com botões visuais (😞-😍)
+- ✅ **Admin:** Aba de administração com monitor de fine-tuning
 
 ---
 
@@ -45,9 +46,11 @@ curl http://web.localhost/api/system/stats
 ### HTML Servido:
 ```bash
 curl http://web.localhost/ | head -20
-# ✅ Mostra: Agent1 v0.5.1 - Modo Treinamento
+# ✅ Mostra: Agent1 v0.5.2 - Modo Treinamento
 # ✅ Cores: #0f1419 (fundo escuro)
 # ✅ Elementos: conversationsList, messageInput, sendBtn
+# ✅ Tabs: Chat e Admin com navegação
+# ✅ Sistema de feedback integrado
 ```
 
 ### Para Ver Interface Atualizada:
@@ -123,8 +126,10 @@ http://web.localhost
 ### 3. Deve Ver:
 - **Cor de fundo:** Azul petróleo escuro (#0f1419)
 - **Sidebar:** 260px, lista de conversas
-- **Header:** "Agent1 v0.5.1"
+- **Header:** "Agent1 v0.5.2"
 - **Tabs:** 💬 Chat | ⚙️ Admin
+- **Feedback:** Botões (😞-😍) abaixo das respostas do assistente
+- **Admin:** Monitor de fine-tuning e botões de administração
 - **Sem:** Seletor admin/usuário (removido)
 
 ### 4. Testar:
@@ -132,6 +137,8 @@ http://web.localhost
 - Clique conversa antiga → Recarrega
 - Clique ⚙️ Admin → Botões aparecem
 - Clique "Ver Estatísticas" → Mostra dados
+- **NOVO:** Avalie respostas com emojis (😞-😍)
+- **NOVO:** Monitore progresso de fine-tuning na aba Admin
 
 ---
 

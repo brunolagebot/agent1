@@ -62,3 +62,179 @@
 {"timestamp":"2025-10-19T19:20:51.029Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"8292ms","module":"telemetry"},"error":null}
 {"timestamp":"2025-10-19T19:20:51.030Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
 {"timestamp":"2025-10-19T19:20:51.031Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.678Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.690Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"12ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.691Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.693Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"2ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.693Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.694Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.694Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.726Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"32ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.726Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.748Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"22ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.749Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.749Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:25:16.749Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:26:12.655Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"55906ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:26:12.656Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:26:12.660Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"4ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.857Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.869Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"12ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.870Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.873Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"3ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.874Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.875Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.875Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.980Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"105ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:14.980Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:15.068Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"88ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:15.069Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:15.069Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:30:15.070Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:31:31.846Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"76776ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:31:31.846Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:31:31.851Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.768Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.769Z","level":"debug","message":"Progress update","context":{"stage":"create_conversation","message":"📝 Criando/carregando conversa","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.786Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"18ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.787Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.787Z","level":"debug","message":"Progress update","context":{"stage":"save_user_message","message":"💾 Salvando mensagem","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.790Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"3ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.790Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.790Z","level":"debug","message":"Progress update","context":{"stage":"load_history","message":"📜 Carregando histórico","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.791Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.792Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:08.792Z","level":"debug","message":"Progress update","context":{"stage":"search_documents","message":"🔍 Buscando em documentos","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.136Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"344ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.137Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.137Z","level":"debug","message":"Progress update","context":{"stage":"search_knowledge_base","message":"🧠 Consultando base de conhecimento","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.162Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"25ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.162Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.163Z","level":"debug","message":"Progress update","context":{"stage":"prepare_context","message":"⚙️ Preparando contexto","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.163Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.163Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:52:09.163Z","level":"debug","message":"Progress update","context":{"stage":"llm_generation","message":"🤖 Gerando resposta (LLM)","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:53:19.906Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"70743ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:53:19.907Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:53:19.907Z","level":"debug","message":"Progress update","context":{"stage":"save_assistant_message","message":"💾 Salvando resposta","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:53:19.912Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.857Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.857Z","level":"debug","message":"Progress update","context":{"stage":"create_conversation","message":"📝 Criando/carregando conversa","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.860Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"3ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.860Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.860Z","level":"debug","message":"Progress update","context":{"stage":"save_user_message","message":"💾 Salvando mensagem","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.861Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.862Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.862Z","level":"debug","message":"Progress update","context":{"stage":"load_history","message":"📜 Carregando histórico","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.863Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.863Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:37.863Z","level":"debug","message":"Progress update","context":{"stage":"search_documents","message":"🔍 Buscando em documentos","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.175Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"312ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.176Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.176Z","level":"debug","message":"Progress update","context":{"stage":"search_knowledge_base","message":"🧠 Consultando base de conhecimento","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.193Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"17ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.194Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.194Z","level":"debug","message":"Progress update","context":{"stage":"prepare_context","message":"⚙️ Preparando contexto","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.194Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.195Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:58:38.195Z","level":"debug","message":"Progress update","context":{"stage":"llm_generation","message":"🤖 Gerando resposta (LLM)","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:16.091Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"37896ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:16.092Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:16.092Z","level":"debug","message":"Progress update","context":{"stage":"save_assistant_message","message":"💾 Salvando resposta","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:16.097Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.858Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.859Z","level":"debug","message":"Progress update","context":{"stage":"create_conversation","message":"📝 Criando/carregando conversa","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.879Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"21ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.879Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.880Z","level":"debug","message":"Progress update","context":{"stage":"save_user_message","message":"💾 Salvando mensagem","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.883Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"4ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.883Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.884Z","level":"debug","message":"Progress update","context":{"stage":"load_history","message":"📜 Carregando histórico","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.885Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"2ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.886Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.886Z","level":"debug","message":"Progress update","context":{"stage":"search_documents","message":"🔍 Buscando em documentos","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.907Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"21ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.908Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.908Z","level":"debug","message":"Progress update","context":{"stage":"search_knowledge_base","message":"🧠 Consultando base de conhecimento","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.923Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"15ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.924Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.924Z","level":"debug","message":"Progress update","context":{"stage":"prepare_context","message":"⚙️ Preparando contexto","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.924Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.925Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:48.925Z","level":"debug","message":"Progress update","context":{"stage":"llm_generation","message":"🤖 Gerando resposta (LLM)","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:59.655Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"10730ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:59.656Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:59:59.656Z","level":"debug","message":"Progress update","context":{"stage":"save_assistant_message","message":"💾 Salvando resposta","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:59:59.661Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.324Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.326Z","level":"debug","message":"Progress update","context":{"stage":"create_conversation","message":"📝 Criando/carregando conversa","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.340Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"16ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.341Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.341Z","level":"debug","message":"Progress update","context":{"stage":"save_user_message","message":"💾 Salvando mensagem","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.343Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"2ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.344Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.344Z","level":"debug","message":"Progress update","context":{"stage":"load_history","message":"📜 Carregando histórico","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.345Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"2ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.345Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.346Z","level":"debug","message":"Progress update","context":{"stage":"search_documents","message":"🔍 Buscando em documentos","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.389Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"44ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.390Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.390Z","level":"debug","message":"Progress update","context":{"stage":"search_knowledge_base","message":"🧠 Consultando base de conhecimento","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.415Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"25ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.415Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.415Z","level":"debug","message":"Progress update","context":{"stage":"prepare_context","message":"⚙️ Preparando contexto","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.415Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.416Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:04:47.416Z","level":"debug","message":"Progress update","context":{"stage":"llm_generation","message":"🤖 Gerando resposta (LLM)","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:05:38.716Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"51300ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:05:38.717Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:05:38.717Z","level":"debug","message":"Progress update","context":{"stage":"save_assistant_message","message":"💾 Salvando resposta","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:05:38.722Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.688Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.690Z","level":"debug","message":"Progress update","context":{"stage":"create_conversation","message":"📝 Criando/carregando conversa","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.699Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"11ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.700Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.701Z","level":"debug","message":"Progress update","context":{"stage":"save_user_message","message":"💾 Salvando mensagem","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.703Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"3ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.704Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.704Z","level":"debug","message":"Progress update","context":{"stage":"load_history","message":"📜 Carregando histórico","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.706Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.707Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.707Z","level":"debug","message":"Progress update","context":{"stage":"search_documents","message":"🔍 Buscando em documentos","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.814Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"107ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.814Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.815Z","level":"debug","message":"Progress update","context":{"stage":"search_knowledge_base","message":"🧠 Consultando base de conhecimento","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.910Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"96ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.910Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.911Z","level":"debug","message":"Progress update","context":{"stage":"prepare_context","message":"⚙️ Preparando contexto","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.911Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.911Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:09:02.912Z","level":"debug","message":"Progress update","context":{"stage":"llm_generation","message":"🤖 Gerando resposta (LLM)","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:10:11.264Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"68353ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:10:11.265Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:10:11.265Z","level":"debug","message":"Progress update","context":{"stage":"save_assistant_message","message":"💾 Salvando resposta","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:10:11.270Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.474Z","level":"debug","message":"Stage started: chat → create_conversation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.475Z","level":"debug","message":"Progress update","context":{"stage":"create_conversation","message":"📝 Criando/carregando conversa","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.483Z","level":"debug","message":"Stage completed: chat → create_conversation","context":{"duration":"9ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.483Z","level":"debug","message":"Stage started: chat → save_user_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.484Z","level":"debug","message":"Progress update","context":{"stage":"save_user_message","message":"💾 Salvando mensagem","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.485Z","level":"debug","message":"Stage completed: chat → save_user_message","context":{"duration":"2ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.486Z","level":"debug","message":"Stage started: chat → load_history","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.486Z","level":"debug","message":"Progress update","context":{"stage":"load_history","message":"📜 Carregando histórico","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.487Z","level":"debug","message":"Stage completed: chat → load_history","context":{"duration":"1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.488Z","level":"debug","message":"Stage started: chat → search_documents","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.488Z","level":"debug","message":"Progress update","context":{"stage":"search_documents","message":"🔍 Buscando em documentos","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.972Z","level":"debug","message":"Stage completed: chat → search_documents","context":{"duration":"484ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.972Z","level":"debug","message":"Stage started: chat → search_knowledge_base","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:40.973Z","level":"debug","message":"Progress update","context":{"stage":"search_knowledge_base","message":"🧠 Consultando base de conhecimento","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:15:41.144Z","level":"debug","message":"Stage completed: chat → search_knowledge_base","context":{"duration":"172ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:41.145Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:41.145Z","level":"debug","message":"Progress update","context":{"stage":"prepare_context","message":"⚙️ Preparando contexto","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:15:41.145Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:41.146Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:15:41.146Z","level":"debug","message":"Progress update","context":{"stage":"llm_generation","message":"🤖 Gerando resposta (LLM)","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:17:36.916Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"115770ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:17:36.917Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T20:17:36.918Z","level":"debug","message":"Progress update","context":{"stage":"save_assistant_message","message":"💾 Salvando resposta","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T20:17:36.922Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"5ms","module":"telemetry"},"error":null}

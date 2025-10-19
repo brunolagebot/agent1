@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.5.2] - 2025-10-19
+### Adicionado
+- **Sistema de Feedback Completo**
+  - Botões de avaliação (😞-😍) abaixo de cada resposta do assistente
+  - Avaliação de 1-5 pontos com feedback visual
+  - Armazenamento de feedback no banco de dados
+  - Atualização automática do status de fine-tuning
+  - Interface responsiva com botões desabilitados após avaliação
+- **Aba de Administração Avançada**
+  - Monitor de fine-tuning em tempo real
+  - Critérios automáticos: 50+ conversas, 200+ mensagens, 20+ feedbacks, média 3.5+
+  - Status visual: 🔴 Precisa de mais dados, 🟡 Quase pronto, ✅ Pronto para Fine-tuning
+  - Botões de administração: estatísticas, performance, export, modelos, upload, versão
+  - Navegação por tabs entre Chat e Admin
+- **Endpoints de Administração**
+  - `/api/admin/models` - Lista modelos disponíveis no Ollama
+  - `/api/admin/finetuning-status` - Status detalhado para fine-tuning
+  - `/api/admin/export` - Exportação de dados de treino
+  - `/api/messages/feedback` - Sistema de feedback de mensagens
+
+### Modificado
+- **LLM Otimizado para Respostas Objetivas**
+  - Prompt do sistema atualizado para respostas concisas e diretas
+  - Instruções claras para evitar textos desnecessários
+  - Mantém contexto mas com foco na objetividade
+- **Sistema de Mensagens Aprimorado**
+  - Campo `messageId` retornado pelo chat para feedback
+  - Campos de feedback incluídos na consulta de mensagens
+  - Mapeamento completo de campos de feedback na API
+  - Classe Message atualizada com campos de feedback
+- **Interface de Chat Melhorada**
+  - Sistema de feedback integrado na interface
+  - Tabs para navegação entre Chat e Admin
+  - Monitor de fine-tuning na sidebar de administração
+  - Feedback visual aprimorado
+
+### Corrigido
+- Sistema de feedback não aparecia na interface
+- Campos de feedback não eram retornados pela API
+- Consulta de mensagens não incluía dados de feedback
+- Endpoint de feedback usava parâmetros incorretos
+- Status de fine-tuning não contabilizava feedbacks corretamente
+
 ## [0.5.1] - 2025-10-19
 ### Adicionado
 - **Telemetria Detalhada em Tempo Real**

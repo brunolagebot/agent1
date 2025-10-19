@@ -1,6 +1,6 @@
 {
   "name": "agent1",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Agent1 - SaaS modular com LLM local + RAG",
   "main": "apps/web/interfaces/http/server.js",
   "scripts": {

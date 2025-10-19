@@ -4,8 +4,14 @@
  */
 
 const { PostgresConversationsRepository } = require('../../../infra/conversations/postgres_conversations_repository');
+const { PostgresDocumentsRepository } = require('../../../infra/documents/postgres_documents_repository');
+const { PostgresKnowledgeRepository } = require('../../../infra/knowledge/postgres_knowledge_repository');
+const { OllamaClient } = require('../../../infra/llm/ollama_client');
 
-const repo = new PostgresConversationsRepository();
+const conversationsRepo = new PostgresConversationsRepository();
+const documentsRepo = new PostgresDocumentsRepository();
+const knowledgeRepo = new PostgresKnowledgeRepository();
+const ollamaClient = new OllamaClient();
 
 /**
  * POST /api/admin/approve
@@ -27,7 +33,7 @@ async function handleApproveRoute(req, res) {
         return;
       }
 
-      await repo.approveForTraining(conversationId, approved);
+      await conversationsRepo.approveForTraining(conversationId, approved);
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ status: 'ok', conversationId, approved }));
@@ -45,11 +51,11 @@ async function handleApproveRoute(req, res) {
  */
 async function handleExportRoute(req, res) {
   try {
-    const conversations = await repo.listConversations({ approvedForTraining: true });
+    const conversations = await conversationsRepo.listConversations({ approvedForTraining: true });
     const lines = [];
 
     for (const conv of conversations) {
-      const messages = await repo.getMessages(conv.id);
+      const messages = await conversationsRepo.getMessages(conv.id);
       
       // Formato para fine-tuning (compatível com OpenAI/Llama)
       const formattedMessages = messages.map(m => ({
@@ -70,6 +76,87 @@ async function handleExportRoute(req, res) {
 }
 
 /**
+ * GET /api/admin/models
+ * Lista modelos disponíveis no Ollama
+ */
+async function handleModelsRoute(req, res) {
+  try {
+    const models = await ollamaClient.listModels();
+    
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ models }));
+  } catch (error) {
+    console.error('[admin/models] Error:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: error.message }));
+  }
+}
+
+/**
+ * GET /api/admin/finetuning-status
+ * Retorna status detalhado para fine-tuning
+ */
+async function handleFineTuningStatusRoute(req, res) {
+  try {
+    const conversations = await conversationsRepo.listConversations();
+    const documents = await documentsRepo.listDocuments();
+    const facts = await knowledgeRepo.listFacts();
+    
+    // Contar mensagens com feedback
+    let totalMessages = 0;
+    let feedbackCount = 0;
+    let totalFeedbackScore = 0;
+    
+    for (const conv of conversations) {
+      const messages = await conversationsRepo.getMessages(conv.id);
+      totalMessages += messages.length;
+      
+      for (const msg of messages) {
+        if (msg.feedback_score !== null && msg.feedback_score !== undefined) {
+          feedbackCount++;
+          totalFeedbackScore += msg.feedback_score;
+        }
+      }
+    }
+    
+    const avgFeedback = feedbackCount > 0 ? (totalFeedbackScore / feedbackCount).toFixed(2) : '0.00';
+    
+    // Critérios para fine-tuning
+    const criteria = {
+      conversations: { current: conversations.length, required: 50 },
+      messages: { current: totalMessages, required: 200 },
+      feedback: { current: feedbackCount, required: 20 },
+      avgFeedback: { current: parseFloat(avgFeedback), required: 3.5 }
+    };
+    
+    const isReady = criteria.conversations.current >= criteria.conversations.required &&
+                   criteria.messages.current >= criteria.messages.required &&
+                   criteria.feedback.current >= criteria.feedback.required &&
+                   criteria.avgFeedback.current >= criteria.avgFeedback.required;
+    
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      isReady,
+      criteria,
+      stats: {
+        conversations: conversations.length,
+        messages: totalMessages,
+        documents: documents.length,
+        facts: facts.length,
+        feedback: {
+          count: feedbackCount,
+          average: avgFeedback
+        }
+      }
+    }));
+  } catch (error) {
+    console.error('[admin/finetuning-status] Error:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: error.message }));
+  }
+}
+
+/**
  * Router para /api/admin/*
  */
 function handleAdminRoutes(url, req, res) {
@@ -82,6 +169,14 @@ function handleAdminRoutes(url, req, res) {
   
   if (url === '/api/admin/export' && req.method === 'GET') {
     return handleExportRoute(req, res);
+  }
+  
+  if (url === '/api/admin/models' && req.method === 'GET') {
+    return handleModelsRoute(req, res);
+  }
+  
+  if (url === '/api/admin/finetuning-status' && req.method === 'GET') {
+    return handleFineTuningStatusRoute(req, res);
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });

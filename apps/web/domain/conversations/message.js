@@ -6,7 +6,7 @@
 const VALID_ROLES = ['user', 'assistant', 'system'];
 
 class Message {
-  constructor({ id, conversationId, role, content, createdAt, metadata = {} }) {
+  constructor({ id, conversationId, role, content, createdAt, metadata = {}, feedbackScore = null, feedbackComment = null, feedbackAt = null }) {
     if (!VALID_ROLES.includes(role)) {
       throw new Error(`Invalid role: ${role}. Must be one of: ${VALID_ROLES.join(', ')}`);
     }
@@ -20,6 +20,9 @@ class Message {
     this.content = content;
     this.createdAt = createdAt || new Date();
     this.metadata = metadata;
+    this.feedbackScore = feedbackScore;
+    this.feedbackComment = feedbackComment;
+    this.feedbackAt = feedbackAt;
   }
 
   /**
@@ -59,6 +62,9 @@ class Message {
       content: data.content,
       createdAt: new Date(data.created_at),
       metadata: data.metadata || {},
+      feedbackScore: data.feedback_score,
+      feedbackComment: data.feedback_comment,
+      feedbackAt: data.feedback_at ? new Date(data.feedback_at) : null,
     });
   }
 
@@ -73,6 +79,9 @@ class Message {
       content: this.content,
       created_at: this.createdAt,
       metadata: this.metadata,
+      feedback_score: this.feedbackScore,
+      feedback_comment: this.feedbackComment,
+      feedback_at: this.feedbackAt,
     };
   }
 }

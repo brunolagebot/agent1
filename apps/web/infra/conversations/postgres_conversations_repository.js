@@ -97,7 +97,7 @@ class PostgresConversationsRepository {
    */
   async getMessages(conversationId) {
     const result = await query(
-      `SELECT id, conversation_id, role, content, created_at, metadata
+      `SELECT id, conversation_id, role, content, created_at, metadata, feedback_score, feedback_comment, feedback_at
        FROM messages
        WHERE conversation_id = $1
        ORDER BY created_at ASC`,

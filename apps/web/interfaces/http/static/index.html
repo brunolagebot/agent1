@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent1 v0.5.1</title>
+  <title>Agent1 v0.5.2</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
@@ -49,33 +49,77 @@
 </head>
 <body>
   <div class="header">
-    <h1>🤖 Agent1 v0.5.1</h1>
+    <h1>🤖 Agent1 v0.5.2</h1>
     <p>Modo Treinamento • Qwen2.5:14b</p>
   </div>
 
   <div class="container">
     <div class="sidebar">
       <button onclick="newChat()" style="width: 100%; margin-bottom: 20px;">➕ Nova Conversa</button>
-      <h3 style="margin-bottom: 10px;">Histórico</h3>
-      <div id="convList"></div>
+      
+      <!-- Tabs -->
+      <div style="display: flex; margin-bottom: 20px; border-radius: 6px; overflow: hidden;">
+        <button id="chatTab" onclick="showTab('chat')" style="flex: 1; margin: 0; border-radius: 0; background: #2d6a7a;">💬 Chat</button>
+        <button id="adminTab" onclick="showTab('admin')" style="flex: 1; margin: 0; border-radius: 0; background: #1a4d5e;">⚙️ Admin</button>
+      </div>
+      
+      <div id="chatSidebar">
+        <h3 style="margin-bottom: 10px;">Histórico</h3>
+        <div id="convList"></div>
+      </div>
+      
+      <div id="adminSidebar" style="display: none;">
+        <h3 style="margin-bottom: 15px;">📊 Administração</h3>
+        
+        <!-- Fine-tuning Monitor -->
+        <div style="background: #0f1419; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #2d6a7a;">
+          <h4 style="color: #a8c5d1; margin-bottom: 10px;">🎯 Fine-tuning</h4>
+          <div id="finetuningStatus" style="font-size: 12px; color: #7a9ca8;">
+            <div>📝 Conversas: <span id="convCount">-</span></div>
+            <div>💬 Mensagens: <span id="msgCount">-</span></div>
+            <div>⭐ Feedback: <span id="feedbackCount">-</span></div>
+            <div style="margin-top: 8px; padding: 8px; border-radius: 4px; background: #1a2332;">
+              <strong id="finetuningReady" style="color: #ffa500;">⏳ Analisando...</strong>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Admin Buttons -->
+        <button onclick="showStats()" style="width: 100%; margin-bottom: 10px;">📊 Ver Estatísticas</button>
+        <button onclick="analyzePerformance()" style="width: 100%; margin-bottom: 10px;">🔍 Análise de Performance</button>
+        <button onclick="exportTraining()" style="width: 100%; margin-bottom: 10px;">📥 Exportar para Treino</button>
+        <button onclick="listModels()" style="width: 100%; margin-bottom: 10px;">🤖 Listar Modelos</button>
+        <button onclick="uploadDocument()" style="width: 100%; margin-bottom: 10px;">📄 Upload Documento</button>
+        <button onclick="showVersion()" style="width: 100%; margin-bottom: 10px;">📖 Ver Versão</button>
+      </div>
     </div>
 
     <div class="main">
-      <h3>💬 Chat - Modo Treinamento</h3>
+      <div id="chatMain">
+        <h3>💬 Chat - Modo Treinamento</h3>
       <div id="telemetry">
         <div style="color: #a8c5d1; font-weight: bold; margin-bottom: 8px;">⏱️ Telemetria em Tempo Real</div>
         <div id="telemStages"></div>
       </div>
-      <div id="messages"></div>
-      <div id="status" style="margin: 10px 0; color: #7a9ca8; font-size: 13px;"></div>
-      <textarea id="input" placeholder="Digite sua mensagem..." rows="3"></textarea>
-      <button onclick="send()" style="margin-top: 10px; width: 100%;">Enviar</button>
+        <div id="messages"></div>
+        <div id="status" style="margin: 10px 0; color: #7a9ca8; font-size: 13px;"></div>
+        <textarea id="input" placeholder="Digite sua mensagem..." rows="3"></textarea>
+        <button onclick="send()" style="margin-top: 10px; width: 100%;">Enviar</button>
+      </div>
+      
+      <div id="adminMain" style="display: none;">
+        <h3>⚙️ Painel de Administração</h3>
+        <div id="adminContent" style="margin-top: 20px;">
+          <p style="color: #7a9ca8;">Selecione uma opção na sidebar para começar.</p>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     let convId = null;
     let convs = [];
+    let currentTab = 'chat';
     
     const stageLabels = {
       'create_conversation': '1. Criar/carregar conversa',
@@ -165,10 +209,29 @@
       document.getElementById('input').value = '';
     }
 
-    function addMsg(role, text) {
+    function addMsg(role, text, messageId = null) {
       const div = document.createElement('div');
       div.className = 'msg ' + role;
       div.textContent = text;
+      
+      // Adicionar feedback para mensagens do assistente
+      if (role === 'assistant' && messageId) {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'feedback-container';
+        feedbackDiv.style.cssText = 'margin-top: 10px; text-align: center;';
+        feedbackDiv.innerHTML = `
+          <div style="font-size: 12px; color: #7a9ca8; margin-bottom: 5px;">Avalie esta resposta:</div>
+          <div class="feedback-buttons" style="display: flex; gap: 5px; justify-content: center;">
+            <button onclick="submitFeedback('${messageId}', 1)" style="padding: 5px 10px; font-size: 16px; background: transparent; border: 1px solid #2d6a7a; border-radius: 4px; cursor: pointer;">😞</button>
+            <button onclick="submitFeedback('${messageId}', 2)" style="padding: 5px 10px; font-size: 16px; background: transparent; border: 1px solid #2d6a7a; border-radius: 4px; cursor: pointer;">😕</button>
+            <button onclick="submitFeedback('${messageId}', 3)" style="padding: 5px 10px; font-size: 16px; background: transparent; border: 1px solid #2d6a7a; border-radius: 4px; cursor: pointer;">😐</button>
+            <button onclick="submitFeedback('${messageId}', 4)" style="padding: 5px 10px; font-size: 16px; background: transparent; border: 1px solid #2d6a7a; border-radius: 4px; cursor: pointer;">🙂</button>
+            <button onclick="submitFeedback('${messageId}', 5)" style="padding: 5px 10px; font-size: 16px; background: transparent; border: 1px solid #2d6a7a; border-radius: 4px; cursor: pointer;">😍</button>
+          </div>
+        `;
+        div.appendChild(feedbackDiv);
+      }
+      
       document.getElementById('messages').appendChild(div);
       document.getElementById('messages').scrollTop = 999999;
     }
@@ -218,7 +281,7 @@
         if (d.error) throw new Error(d.error);
 
         convId = d.conversationId;
-        addMsg('assistant', d.assistantMessage);
+        addMsg('assistant', d.assistantMessage, d.messageId);
         
         // Atualizar telemetria com dados reais
         if (d.telemetry && d.telemetry.stages) {
@@ -252,6 +315,282 @@
         send();
       }
     });
+
+    // Feedback System
+    async function submitFeedback(messageId, rating) {
+      try {
+        const response = await fetch('/api/messages/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageId, rating })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Encontrar o botão clicado e destacar
+          const buttons = document.querySelectorAll(`button[onclick="submitFeedback('${messageId}', ${rating})"]`);
+          buttons.forEach(btn => {
+            btn.style.background = '#5db88f';
+            btn.style.borderColor = '#5db88f';
+            btn.disabled = true;
+          });
+          
+          // Desabilitar todos os botões de feedback desta mensagem
+          const allButtons = document.querySelectorAll(`button[onclick*="submitFeedback('${messageId}'"]`);
+          allButtons.forEach(btn => {
+            if (!btn.disabled) {
+              btn.style.opacity = '0.5';
+              btn.disabled = true;
+            }
+          });
+          
+          // Atualizar status de fine-tuning se estivermos na aba admin
+          if (currentTab === 'admin') {
+            updateFineTuningStatus();
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao enviar feedback:', error);
+      }
+    }
+
+    // Tab Management
+    function showTab(tab) {
+      currentTab = tab;
+      
+      // Update tab buttons
+      document.getElementById('chatTab').style.background = tab === 'chat' ? '#2d6a7a' : '#1a4d5e';
+      document.getElementById('adminTab').style.background = tab === 'admin' ? '#2d6a7a' : '#1a4d5e';
+      
+      // Show/hide sidebar sections
+      document.getElementById('chatSidebar').style.display = tab === 'chat' ? 'block' : 'none';
+      document.getElementById('adminSidebar').style.display = tab === 'admin' ? 'block' : 'none';
+      
+      // Show/hide main sections
+      document.getElementById('chatMain').style.display = tab === 'chat' ? 'block' : 'none';
+      document.getElementById('adminMain').style.display = tab === 'admin' ? 'block' : 'none';
+      
+      if (tab === 'admin') {
+        updateFineTuningStatus();
+      }
+    }
+
+    // Fine-tuning Status Monitor
+    async function updateFineTuningStatus() {
+      try {
+        const response = await fetch('/api/system/stats');
+        const stats = await response.json();
+        
+        document.getElementById('convCount').textContent = stats.conversations || 0;
+        document.getElementById('msgCount').textContent = stats.messages || 0;
+        document.getElementById('feedbackCount').textContent = stats.feedback?.count || 0;
+        
+        // Calculate if ready for fine-tuning
+        const conversations = stats.conversations || 0;
+        const messages = stats.messages || 0;
+        const feedbackCount = stats.feedback?.count || 0;
+        const avgFeedback = parseFloat(stats.feedback?.average || 0);
+        
+        const readyElement = document.getElementById('finetuningReady');
+        
+        if (conversations >= 50 && messages >= 200 && feedbackCount >= 20 && avgFeedback >= 3.5) {
+          readyElement.innerHTML = '✅ <span style="color: #5db88f;">Pronto para Fine-tuning!</span>';
+          readyElement.style.background = '#1a4d2a';
+        } else if (conversations >= 20 && messages >= 100 && feedbackCount >= 10) {
+          readyElement.innerHTML = '🟡 <span style="color: #ffa500;">Quase pronto</span>';
+          readyElement.style.background = '#4d3a1a';
+        } else {
+          readyElement.innerHTML = '🔴 <span style="color: #ff6b6b;">Precisa de mais dados</span>';
+          readyElement.style.background = '#4d1a1a';
+        }
+        
+        // Show requirements
+        const requirements = [];
+        if (conversations < 50) requirements.push(`${50 - conversations} conversas`);
+        if (messages < 200) requirements.push(`${200 - messages} mensagens`);
+        if (feedbackCount < 20) requirements.push(`${20 - feedbackCount} feedbacks`);
+        if (avgFeedback < 3.5) requirements.push(`média ${(3.5 - avgFeedback).toFixed(1)} pontos`);
+        
+        if (requirements.length > 0) {
+          readyElement.innerHTML += '<br><small style="color: #7a9ca8;">Faltam: ' + requirements.join(', ') + '</small>';
+        }
+        
+      } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        document.getElementById('finetuningReady').innerHTML = '❌ Erro ao carregar';
+      }
+    }
+
+    // Admin Functions
+    async function showStats() {
+      try {
+        const response = await fetch('/api/system/stats');
+        const stats = await response.json();
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #a8c5d1; margin-bottom: 15px;">📊 Estatísticas do Sistema</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div style="background: #1a2332; padding: 15px; border-radius: 4px;">
+                <h5 style="color: #7a9ca8;">💬 Conversas</h5>
+                <div style="font-size: 24px; color: #a8c5d1; font-weight: bold;">${stats.conversations || 0}</div>
+              </div>
+              <div style="background: #1a2332; padding: 15px; border-radius: 4px;">
+                <h5 style="color: #7a9ca8;">📝 Mensagens</h5>
+                <div style="font-size: 24px; color: #a8c5d1; font-weight: bold;">${stats.messages || 0}</div>
+              </div>
+              <div style="background: #1a2332; padding: 15px; border-radius: 4px;">
+                <h5 style="color: #7a9ca8;">📄 Documentos</h5>
+                <div style="font-size: 24px; color: #a8c5d1; font-weight: bold;">${stats.documents || 0}</div>
+              </div>
+              <div style="background: #1a2332; padding: 15px; border-radius: 4px;">
+                <h5 style="color: #7a9ca8;">🧠 Fatos</h5>
+                <div style="font-size: 24px; color: #a8c5d1; font-weight: bold;">${stats.facts || 0}</div>
+              </div>
+            </div>
+            <div style="margin-top: 20px; background: #1a2332; padding: 15px; border-radius: 4px;">
+              <h5 style="color: #7a9ca8;">⭐ Feedback</h5>
+              <div>Média: <strong style="color: #a8c5d1;">${stats.feedback?.average || '0.00'}/5.0</strong></div>
+              <div>Total: <strong style="color: #a8c5d1;">${stats.feedback?.count || 0}</strong> avaliações</div>
+            </div>
+            <div style="margin-top: 20px; background: #1a2332; padding: 15px; border-radius: 4px;">
+              <h5 style="color: #7a9ca8;">⚡ Performance</h5>
+              ${stats.performance?.map(p => 
+                `<div>${p.operation}: <strong style="color: #a8c5d1;">${(p.avg_ms / 1000).toFixed(2)}s</strong></div>`
+              ).join('') || '<div>Nenhum dado disponível</div>'}
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    async function analyzePerformance() {
+      try {
+        const response = await fetch('/api/logs/analyze');
+        const analysis = await response.json();
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #a8c5d1; margin-bottom: 15px;">🔍 Análise de Performance</h4>
+            <pre style="background: #1a2332; padding: 15px; border-radius: 4px; overflow-x: auto; color: #e3e8ec; font-size: 12px;">${JSON.stringify(analysis, null, 2)}</pre>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    async function exportTraining() {
+      try {
+        document.getElementById('adminContent').innerHTML = '<p style="color: #7a9ca8;">📥 Preparando exportação...</p>';
+        
+        const response = await fetch('/api/admin/export');
+        const blob = await response.blob();
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `training-data-${new Date().toISOString().split('T')[0]}.jsonl`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #5db88f; margin-bottom: 15px;">✅ Exportação Concluída</h4>
+            <p>Arquivo de treinamento baixado com sucesso!</p>
+            <p style="color: #7a9ca8; font-size: 12px; margin-top: 10px;">
+              Use este arquivo para fine-tuning do modelo com ferramentas como LoRA, QLoRA ou similar.
+            </p>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    async function listModels() {
+      try {
+        const response = await fetch('/api/admin/models');
+        const models = await response.json();
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #a8c5d1; margin-bottom: 15px;">🤖 Modelos Disponíveis</h4>
+            <pre style="background: #1a2332; padding: 15px; border-radius: 4px; overflow-x: auto; color: #e3e8ec; font-size: 12px;">${JSON.stringify(models, null, 2)}</pre>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    function uploadDocument() {
+      document.getElementById('adminContent').innerHTML = `
+        <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+          <h4 style="color: #a8c5d1; margin-bottom: 15px;">📄 Upload de Documento</h4>
+          <input type="file" id="fileInput" accept=".pdf,.txt,.md" style="margin-bottom: 15px;">
+          <button onclick="doUpload()" style="width: 100%;">📤 Enviar Documento</button>
+          <div id="uploadStatus" style="margin-top: 15px;"></div>
+        </div>
+      `;
+    }
+
+    async function doUpload() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        document.getElementById('uploadStatus').innerHTML = '<p style="color: #ff6b6b;">Selecione um arquivo primeiro!</p>';
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        document.getElementById('uploadStatus').innerHTML = '<p style="color: #7a9ca8;">📤 Enviando...</p>';
+        
+        const response = await fetch('/api/documents/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('uploadStatus').innerHTML = `
+            <p style="color: #5db88f;">✅ Documento enviado com sucesso!</p>
+            <p style="color: #7a9ca8; font-size: 12px;">ID: ${result.documentId}</p>
+            <p style="color: #7a9ca8; font-size: 12px;">Chunks: ${result.chunks}</p>
+          `;
+        } else {
+          document.getElementById('uploadStatus').innerHTML = `<p style="color: #ff6b6b;">Erro: ${result.error}</p>`;
+        }
+      } catch (error) {
+        document.getElementById('uploadStatus').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    async function showVersion() {
+      try {
+        const response = await fetch('/api/system/version');
+        const version = await response.json();
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #a8c5d1; margin-bottom: 15px;">📖 Informações da Versão</h4>
+            <pre style="background: #1a2332; padding: 15px; border-radius: 4px; overflow-x: auto; color: #e3e8ec; font-size: 12px;">${JSON.stringify(version, null, 2)}</pre>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
 
     // Carregar ao iniciar
     loadConvs();

@@ -99,5 +99,20 @@ async function listModels() {
   });
 }
 
-module.exports = { generate, listModels };
+class OllamaClient {
+  constructor() {
+    this.url = process.env.OLLAMA_URL || 'http://localhost:11434';
+    this.defaultModel = process.env.OLLAMA_MODEL || 'qwen2.5:14b-instruct-q4_K_M';
+  }
+
+  async generate({ model = this.defaultModel, messages, temperature = 0.7, maxTokens = 2048 } = {}) {
+    return generate({ model, messages, temperature, maxTokens });
+  }
+
+  async listModels() {
+    return listModels();
+  }
+}
+
+module.exports = { generate, listModels, OllamaClient };
 

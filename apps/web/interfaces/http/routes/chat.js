@@ -54,6 +54,7 @@ async function handleChatRoute(req, res) {
         conversationId: result.conversationId,
         userMessage: result.userMessage.content,
         assistantMessage: result.assistantMessage.content,
+        messageId: result.messageId,
         telemetry: result.telemetry || null,
         progressLog: progressUpdates,
       }, null, 2));

@@ -19,34 +19,28 @@ async function handleFeedbackRoute(req, res) {
   
   req.on('end', async () => {
     try {
-      const { messageId, score, comment = null } = JSON.parse(body || '{}');
+      const { messageId, rating, comment = null } = JSON.parse(body || '{}');
       
-      if (!messageId || !score || score < 1 || score > 5) {
-        logger.warn('Invalid feedback params', { messageId, score });
+      if (!messageId || !rating || rating < 1 || rating > 5) {
+        logger.warn('Invalid feedback params', { messageId, rating });
         res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ error: 'messageId and score (1-5) required' }));
+        res.end(JSON.stringify({ error: 'messageId and rating (1-5) required' }));
         return;
       }
 
-      // Salvar feedback (usando messageId como referência temporária até termos UUID real)
-      // Por enquanto, buscar última mensagem assistant da conversa
+      // Salvar feedback usando o messageId fornecido
       const result = await query(
         `UPDATE messages 
          SET feedback_score = $1, feedback_comment = $2, feedback_at = CURRENT_TIMESTAMP
-         WHERE id IN (
-           SELECT id FROM messages 
-           WHERE role = 'assistant' 
-           ORDER BY created_at DESC 
-           LIMIT 1
-         )
+         WHERE id = $3
          RETURNING id`,
-        [score, comment]
+        [rating, comment, messageId]
       );
 
-      logger.info('Feedback saved', { messageId, score });
+      logger.info('Feedback saved', { messageId, rating });
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ status: 'ok', messageId, score }));
+      res.end(JSON.stringify({ success: true, messageId, rating }));
     } catch (error) {
       logger.error('Feedback save failed', {}, error);
       res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });

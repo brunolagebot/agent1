@@ -95,7 +95,12 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
     if (allContext) {
       messages.unshift({
         role: 'system',
-        content: `Você é um assistente útil. Use o contexto fornecido para responder quando relevante.${allContext}`,
+        content: `Você é um assistente objetivo e direto. Responda de forma concisa e precisa, sem textos desnecessários. Use o contexto fornecido quando relevante.${allContext}`,
+      });
+    } else {
+      messages.unshift({
+        role: 'system',
+        content: `Você é um assistente objetivo e direto. Responda de forma concisa e precisa, sem textos desnecessários. Seja direto ao ponto.`,
       });
     }
     tracker.endStage();
@@ -120,7 +125,7 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
         factsFound,
       }
     );
-    await repo.addMessage(assistantMsg);
+    const savedAssistantMsg = await repo.addMessage(assistantMsg);
     tracker.endStage();
 
     // Finalizar telemetria
@@ -134,7 +139,8 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
     return {
       conversationId: conversation.id,
       userMessage: userMsg,
-      assistantMessage: assistantMsg,
+      assistantMessage: savedAssistantMsg,
+      messageId: savedAssistantMsg.id,
       telemetry,
     };
   } catch (error) {
