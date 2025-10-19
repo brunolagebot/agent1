@@ -7,6 +7,7 @@ const { PostgresConversationsRepository } = require('../../infra/conversations/p
 const { Conversation } = require('../../domain/conversations/conversation');
 const { Message } = require('../../domain/conversations/message');
 const { searchDocuments } = require('../documents/search_documents');
+const { PerformanceTracker } = require('../../infra/telemetry/performance_tracker');
 
 const repo = new PostgresConversationsRepository();
 
@@ -18,82 +19,128 @@ const repo = new PostgresConversationsRepository();
  * @param {boolean} useDocuments - Se true, busca contexto em documentos
  * @returns {Promise<{conversationId, userMessage, assistantMessage}>}
  */
-async function chat({ conversationId = null, userMessage, userRole = 'user', useDocuments = true } = {}) {
+async function chat({ conversationId = null, userMessage, userRole = 'admin', useDocuments = true, onProgress = null } = {}) {
+  const tracker = new PerformanceTracker('chat', conversationId);
   let conversation;
 
-  // 1. Criar ou buscar conversa
-  if (!conversationId) {
-    conversation = Conversation.create({ title: userMessage.slice(0, 50), userRole });
-    conversation = await repo.createConversationWithRole(conversation);
-  } else {
-    conversation = await repo.findConversationById(conversationId);
-    if (!conversation) {
-      throw new Error(`Conversation ${conversationId} not found`);
-    }
-  }
-
-  // 2. Salvar mensagem do usuário
-  const userMsg = Message.createUserMessage(conversation.id, userMessage);
-  await repo.addMessage(userMsg);
-
-  // 3. Buscar histórico
-  const history = await repo.getMessages(conversation.id);
-  const messages = history.map(m => ({ role: m.role, content: m.content }));
-
-  // 4. RAG: buscar contexto relevante em documentos E knowledge base
-  let contextFromDocs = '';
-  let contextFromKB = '';
-  
-  if (useDocuments) {
-    try {
-      // Buscar em documentos
-      const docs = await searchDocuments(userMessage, 3);
-      if (docs.length > 0) {
-        contextFromDocs = '\n\n[Documentos]:\n' + 
-          docs.map((d, i) => `${i + 1}. ${d.content}`).join('\n\n');
+  try {
+    // 1. Criar ou buscar conversa
+    tracker.startStage('create_conversation');
+    if (onProgress) onProgress({ stage: 'create_conversation', message: '📝 Criando/carregando conversa' });
+    
+    if (!conversationId) {
+      conversation = Conversation.create({ title: userMessage.slice(0, 50), userRole });
+      conversation = await repo.createConversationWithRole(conversation);
+    } else {
+      conversation = await repo.findConversationById(conversationId);
+      if (!conversation) {
+        throw new Error(`Conversation ${conversationId} not found`);
       }
-      
-      // Buscar em Knowledge Base (sempre)
-      const { queryFacts } = require('../knowledge/query_facts');
-      const facts = await queryFacts(userMessage, 3);
-      if (facts.length > 0) {
-        contextFromKB = '\n\n[Base de Conhecimento Permanente]:\n' + 
-          facts.map((f, i) => `${i + 1}. ${f.title}: ${f.content}`).join('\n');
-      }
-    } catch (error) {
-      console.error('[chat] RAG error (continuing without docs):', error.message);
     }
-  }
+    tracker.endStage();
 
-  // 5. Adicionar contexto ao sistema se houver
-  const allContext = contextFromKB + contextFromDocs;
-  if (allContext) {
-    messages.unshift({
-      role: 'system',
-      content: `Você é um assistente útil. Use o contexto fornecido para responder quando relevante.${allContext}`,
+    // 2. Salvar mensagem do usuário
+    tracker.startStage('save_user_message');
+    if (onProgress) onProgress({ stage: 'save_user_message', message: '💾 Salvando mensagem' });
+    const userMsg = Message.createUserMessage(conversation.id, userMessage);
+    await repo.addMessage(userMsg);
+    tracker.endStage();
+
+    // 3. Buscar histórico
+    tracker.startStage('load_history');
+    if (onProgress) onProgress({ stage: 'load_history', message: '📜 Carregando histórico' });
+    const history = await repo.getMessages(conversation.id);
+    const messages = history.map(m => ({ role: m.role, content: m.content }));
+    tracker.endStage();
+
+    // 4. RAG: buscar contexto relevante
+    let contextFromDocs = '';
+    let contextFromKB = '';
+    let docsFound = 0;
+    let factsFound = 0;
+    
+    if (useDocuments) {
+      try {
+        // Buscar em documentos
+        tracker.startStage('search_documents');
+        if (onProgress) onProgress({ stage: 'search_documents', message: '🔍 Buscando em documentos' });
+        const docs = await searchDocuments(userMessage, 3);
+        docsFound = docs.length;
+        if (docs.length > 0) {
+          contextFromDocs = '\n\n[Documentos]:\n' + 
+            docs.map((d, i) => `${i + 1}. ${d.content}`).join('\n\n');
+        }
+        tracker.endStage();
+        
+        // Buscar em Knowledge Base
+        tracker.startStage('search_knowledge_base');
+        if (onProgress) onProgress({ stage: 'search_knowledge_base', message: '🧠 Consultando base de conhecimento' });
+        const { queryFacts } = require('../knowledge/query_facts');
+        const facts = await queryFacts(userMessage, 3);
+        factsFound = facts.length;
+        if (facts.length > 0) {
+          contextFromKB = '\n\n[Base de Conhecimento Permanente]:\n' + 
+            facts.map((f, i) => `${i + 1}. ${f.title}: ${f.content}`).join('\n');
+        }
+        tracker.endStage();
+      } catch (error) {
+        console.error('[chat] RAG error (continuing without docs):', error.message);
+      }
+    }
+
+    // 5. Preparar contexto
+    tracker.startStage('prepare_context');
+    if (onProgress) onProgress({ stage: 'prepare_context', message: '⚙️ Preparando contexto' });
+    const allContext = contextFromKB + contextFromDocs;
+    if (allContext) {
+      messages.unshift({
+        role: 'system',
+        content: `Você é um assistente útil. Use o contexto fornecido para responder quando relevante.${allContext}`,
+      });
+    }
+    tracker.endStage();
+
+    // 6. Gerar resposta do LLM
+    tracker.startStage('llm_generation');
+    if (onProgress) onProgress({ stage: 'llm_generation', message: '🤖 Gerando resposta (LLM)' });
+    const response = await generate({ messages });
+    tracker.endStage();
+
+    // 7. Salvar resposta do assistente
+    tracker.startStage('save_assistant_message');
+    if (onProgress) onProgress({ stage: 'save_assistant_message', message: '💾 Salvando resposta' });
+    const assistantMsg = Message.createAssistantMessage(
+      conversation.id,
+      response.content,
+      { 
+        model: response.model, 
+        usedDocuments: contextFromDocs.length > 0,
+        usedKnowledgeBase: contextFromKB.length > 0,
+        docsFound,
+        factsFound,
+      }
+    );
+    await repo.addMessage(assistantMsg);
+    tracker.endStage();
+
+    // Finalizar telemetria
+    const telemetry = await tracker.finish({
+      messageLength: userMessage.length,
+      responseLength: response.content.length,
+      docsFound,
+      factsFound,
     });
+
+    return {
+      conversationId: conversation.id,
+      userMessage: userMsg,
+      assistantMessage: assistantMsg,
+      telemetry,
+    };
+  } catch (error) {
+    await tracker.finish({ error: error.message });
+    throw error;
   }
-
-  // 6. Gerar resposta do LLM
-  const response = await generate({ messages });
-
-  // 7. Salvar resposta do assistente
-  const assistantMsg = Message.createAssistantMessage(
-    conversation.id,
-    response.content,
-    { 
-      model: response.model, 
-      usedDocuments: contextFromDocs.length > 0,
-      usedKnowledgeBase: contextFromKB.length > 0
-    }
-  );
-  await repo.addMessage(assistantMsg);
-
-  return {
-    conversationId: conversation.id,
-    userMessage: userMsg,
-    assistantMessage: assistantMsg,
-  };
 }
 
 module.exports = { chat };

@@ -52,3 +52,10 @@
 {"timestamp":"2025-10-19T18:33:23.571Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":60,"module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T18:33:52.122Z","level":"info","message":"Chat response generated","context":{"conversationId":"131b3b6a-3b03-4732-a66d-a801c472cdb0","module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T18:41:00.146Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:41:16.438Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":37,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:41:38.551Z","level":"info","message":"Chat response generated","context":{"conversationId":"716b3e5e-5652-4fe7-a86a-b22138fed144","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:42:14.714Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"user","messageLength":50,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:42:41.044Z","level":"info","message":"Chat response generated","context":{"conversationId":"eb819e4a-eb78-4a7c-88bc-4e4aca178878","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:49:59.448Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:50:18.235Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":20,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:50:57.111Z","level":"info","message":"Chat response generated","context":{"conversationId":"30079b36-a723-4711-bfce-ab900a26ed2f","module":"routes/chat"},"error":null}
