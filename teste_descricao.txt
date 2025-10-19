@@ -1,0 +1,9 @@
+Este é um documento de teste para verificar a funcionalidade de descrição.
+
+O Agent1 agora suporta:
+- Upload múltiplo de arquivos
+- Campo de descrição opcional
+- Melhor tratamento de erros
+- Interface aprimorada
+
+Este documento será usado para testar se a descrição aparece corretamente na interface de gerenciamento.
