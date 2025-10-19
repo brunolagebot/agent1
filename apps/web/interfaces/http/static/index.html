@@ -118,37 +118,6 @@
       opacity: 0.95;
     }
     
-    .mode { 
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-    
-    .mode label { 
-      background: rgba(255,255,255,0.2);
-      padding: 12px 24px;
-      border-radius: 25px;
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255,255,255,0.3);
-    }
-    
-    .mode label:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    
-    .mode input[type="radio"] {
-      margin-right: 8px;
-    }
-    
-    .mode input[type="radio"]:checked + span {
-      font-weight: 600;
-    }
     
     .upload-section, .chat-section { 
       background: white; 
@@ -419,18 +388,7 @@
 <body>
   <div class="header">
     <h1>🤖 Agent1</h1>
-    <p>Chat Inteligente com RAG • Qwen2.5:14b • Treinamento Automático</p>
-  </div>
-
-  <div class="mode">
-    <label>
-      <input type="radio" name="userRole" value="user" checked>
-      <span>👤 Usuário</span>
-    </label>
-    <label>
-      <input type="radio" name="userRole" value="admin">
-      <span>👑 Admin</span>
-    </label>
+    <p>Chat Inteligente com RAG • Qwen2.5:14b • Modo Treinamento Ativo</p>
   </div>
 
   <div class="container">
@@ -477,7 +435,7 @@
     });
 
     function getUserRole() {
-      return document.querySelector('input[name="userRole"]:checked').value;
+      return 'admin'; // Sempre admin para treinamento
     }
 
     async function loadConversations() {

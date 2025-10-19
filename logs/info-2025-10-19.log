@@ -51,3 +51,4 @@
 {"timestamp":"2025-10-19T18:33:11.455Z","level":"info","message":"Fact added successfully","context":{"factId":"6d632840-6e84-489c-b107-fc86d1a08706","verified":true,"module":"application/knowledge"},"error":null}
 {"timestamp":"2025-10-19T18:33:23.571Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":60,"module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T18:33:52.122Z","level":"info","message":"Chat response generated","context":{"conversationId":"131b3b6a-3b03-4732-a66d-a801c472cdb0","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:41:00.146Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
