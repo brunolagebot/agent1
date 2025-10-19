@@ -15,6 +15,37 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./deploy/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./deploy/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+  
+  postgres:
+    image: ankane/pgvector:latest
+    environment:
+      - POSTGRES_USER=agent1
+      - POSTGRES_PASSWORD=dev_password
+      - POSTGRES_DB=agent1_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/web/infra/db/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+  
   web:
     build:
       context: .
@@ -22,11 +53,25 @@ services:
     image: agent1-web:dev
     environment:
       - PORT=3000
+      - DATABASE_URL=postgres://agent1:dev_password@postgres:5432/agent1_dev
+      - OLLAMA_URL=http://ollama:11434
+      - LOGS_DIR=/app/logs
+    volumes:
+      - ./logs:/app/logs
     labels:
       - traefik.enable=true
       - traefik.http.routers.web.rule=Host(`web.localhost`)
       - traefik.http.routers.web.entrypoints=web
       - traefik.http.services.web.loadbalancer.server.port=3000
     depends_on:
-      - traefik
+      postgres:
+        condition: service_healthy
+      traefik:
+        condition: service_started
+      ollama:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  ollama_data:
 

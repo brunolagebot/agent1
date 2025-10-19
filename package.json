@@ -1,0 +1,19 @@
+{
+  "name": "agent1",
+  "version": "0.4.0",
+  "description": "Agent1 - SaaS modular com LLM local + RAG",
+  "main": "apps/web/interfaces/http/server.js",
+  "scripts": {
+    "start": "node apps/web/interfaces/http/server.js",
+    "dev": "node apps/web/interfaces/http/server.js"
+  },
+  "keywords": ["llm", "chat", "saas", "modular", "rag"],
+  "author": "Bruno Lage",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.13.1",
+    "pdf-parse": "^1.1.1",
+    "formidable": "^3.5.1"
+  }
+}
+

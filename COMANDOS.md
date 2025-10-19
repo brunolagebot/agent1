@@ -1,5 +1,34 @@
 # Comandos e Instruções
 
+## 🚀 Início Rápido
+
+### Iniciando o sistema pela primeira vez
+```bash
+# 1. Instalar Docker (se não tiver)
+scripts/bootstrap_macos.sh
+
+# 2. Reconstruir com dependências
+make dev-build
+
+# 3. Subir ambiente (PostgreSQL + Ollama + Web)
+make dev-up
+
+# 4. Baixar modelos LLM (Qwen2.5 + embeddings)
+scripts/pull_model.sh
+
+# 5. Acessar interface
+open http://web.localhost
+```
+
+### Próximas vezes (depois do primeiro setup)
+```bash
+# Apenas subir (sem rebuild)
+make dev-up
+
+# Acessar
+open http://web.localhost
+```
+
 ## Setup Inicial (macOS)
 
 ### 1. Instalar Docker
@@ -164,6 +193,38 @@ cloudflared tunnel run --url https://localhost:443 agent1
 1. Configure servidor WireGuard
 2. Adicione o host Docker como peer
 3. Acesse via IP privado da VPN
+
+## Logs e Diagnóstico
+
+### Ver logs em tempo real
+```bash
+# Logs do container web
+docker compose -f docker-compose.dev.yml logs -f web
+
+# Logs estruturados em arquivo (JSON)
+tail -f logs/info-2025-10-19.log
+tail -f logs/error-2025-10-19.log
+```
+
+### Análise automática de logs
+```bash
+# Via API
+curl http://web.localhost/api/logs/analyze
+
+# Detecta padrões de erro e sugere correções automaticamente
+```
+
+### Logs estruturados (localização)
+- `logs/debug-YYYY-MM-DD.log` - Logs de debug
+- `logs/info-YYYY-MM-DD.log` - Logs informativos
+- `logs/warn-YYYY-MM-DD.log` - Warnings
+- `logs/error-YYYY-MM-DD.log` - Erros
+
+Formato: JSON (um por linha), fácil para processar com `jq`:
+```bash
+cat logs/error-2025-10-19.log | jq '.message'
+cat logs/info-2025-10-19.log | jq 'select(.context.module == "routes/chat")'
+```
 
 ## Quality Assurance
 

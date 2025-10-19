@@ -1,0 +1,7 @@
+{"timestamp":"2025-10-19T17:45:51.064Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T17:46:04.957Z","level":"info","message":"Upload request started","context":{"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:46:04.963Z","level":"info","message":"File received","context":{"filename":"teste.txt","size":112,"type":"text/plain","module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:46:05.028Z","level":"info","message":"Document ingested successfully","context":{"documentId":"28958a31-2cbe-42dc-9aa9-43b8a775adce","chunks":1,"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:46:15.069Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":29,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:46:24.499Z","level":"info","message":"Chat response generated","context":{"conversationId":"80de30af-f8ee-4662-b47e-51175804d1e4","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:46:34.778Z","level":"info","message":"Log analysis requested","context":{"module":"routes/logs"},"error":null}

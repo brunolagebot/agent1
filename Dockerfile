@@ -2,8 +2,11 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
-# Nenhuma dependência ainda; manter imagem mínima.
+# Copiar package.json e instalar dependências
+COPY package.json package-lock.json* ./
+RUN npm install --omit=dev || npm install
 
+# Copiar código da aplicação
 COPY apps/web /app/apps/web
 
 EXPOSE 3000
