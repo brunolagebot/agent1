@@ -1,4 +1,5 @@
-.PHONY: qa check-docker dev-build dev-up prod-build prod-up
+.PHONY: qa check-docker dev-build dev-up prod-build prod-up docker-clean
+
 qa:
 	pre-commit run --all-files || true
 
@@ -19,3 +20,9 @@ prod-build: check-docker
 
 prod-up: check-docker
 	$(COMPOSE) -f docker-compose.prod.yml up -d
+
+docker-clean: check-docker
+	@echo "Limpando builds antigas do Docker..."
+	docker system prune -f
+	docker image prune -a -f --filter "until=2h"
+	@echo "Docker limpo. Apenas imagens recentes mantidas."

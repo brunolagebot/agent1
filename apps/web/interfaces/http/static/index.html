@@ -3,95 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent1 - Chat Interativo + RAG</title>
+  <title>Agent1 v0.5.1 - Modo Treinamento</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif; 
-      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: #0f1419;
       min-height: 100vh;
+      color: #e3e8ec;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1a2332 0%, #243447 100%);
       padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(100, 150, 170, 0.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    .header h1 { 
+      font-size: 1.8em; 
+      color: #e3e8ec;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .header .version {
+      font-size: 0.75em;
+      color: #6a8a9a;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .header p { 
+      font-size: 0.9em; 
+      color: #8a9aa5;
+      margin-top: 5px;
     }
     
     .container { 
-      max-width: 1400px; 
-      margin: 0 auto;
       display: flex;
-      gap: 20px;
+      height: calc(100vh - 120px);
+      max-width: 1800px;
+      margin: 0 auto;
     }
     
     .sidebar {
-      width: 280px;
-      background: rgba(20, 30, 40, 0.95);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      max-height: calc(100vh - 200px);
+      width: 260px;
+      background: #1a2332;
+      border-right: 1px solid rgba(100, 150, 170, 0.15);
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
-      animation: slideInLeft 0.6s ease-out;
-      border: 1px solid rgba(100, 150, 170, 0.2);
     }
     
-    @keyframes slideInLeft {
-      from { opacity: 0; transform: translateX(-30px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    
-    .main-content {
-      flex: 1;
-    }
-    
-    .sidebar h3 {
-      font-size: 1.1em;
-      color: #a8c5d1;
-      margin-bottom: 15px;
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(100, 150, 170, 0.15);
     }
     
     .new-chat-btn {
       width: 100%;
       padding: 12px;
-      background: linear-gradient(135deg, #1a4d5e 0%, #2d6a7a 100%);
-      color: #e0f2f7;
-      border: none;
-      border-radius: 10px;
+      background: #1a4d5e;
+      color: #e3e8ec;
+      border: 1px solid rgba(100, 150, 170, 0.25);
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
-      margin-bottom: 15px;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(100, 150, 170, 0.3);
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
     }
     
     .new-chat-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(42, 106, 122, 0.6);
-      background: linear-gradient(135deg, #2d6a7a 0%, #1a4d5e 100%);
+      background: #2d6a7a;
+      border-color: rgba(100, 150, 170, 0.4);
+    }
+    
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
     }
     
     .conversation-item {
-      padding: 10px 12px;
-      margin-bottom: 8px;
-      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 4px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background 0.2s;
       border: 1px solid transparent;
-      background: rgba(30, 45, 55, 0.5);
     }
     
     .conversation-item:hover {
-      background: rgba(45, 70, 85, 0.7);
-      border-color: rgba(100, 150, 170, 0.5);
+      background: rgba(45, 70, 85, 0.3);
     }
     
     .conversation-item.active {
-      background: rgba(42, 106, 122, 0.4);
-      border-color: #2a6a7a;
+      background: rgba(42, 106, 122, 0.25);
+      border-color: rgba(100, 150, 170, 0.3);
     }
     
     .conversation-title {
-      font-size: 0.9em;
+      font-size: 13px;
       color: #c5dae0;
-      font-weight: 500;
       margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
@@ -99,273 +114,182 @@
     }
     
     .conversation-date {
-      font-size: 0.75em;
-      color: #7a9ca8;
+      font-size: 11px;
+      color: #6a8a9a;
     }
     
-    .header {
-      text-align: center;
-      color: white;
-      margin-bottom: 30px;
-      animation: fadeIn 0.8s ease-in;
-    }
-    
-    .header h1 { 
-      font-size: 2.5em; 
-      margin-bottom: 10px;
-      font-weight: 700;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    
-    .header p { 
-      font-size: 1.1em; 
-      opacity: 0.95;
-    }
-    
-    
-    .upload-section, .chat-section { 
-      background: rgba(20, 35, 45, 0.95); 
-      padding: 25px; 
-      border-radius: 16px; 
-      margin-bottom: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      animation: slideUp 0.6s ease-out;
-      border: 1px solid rgba(100, 150, 170, 0.2);
-    }
-    
-    h3 { 
-      color: #a8c5d1; 
-      margin-bottom: 15px;
-      font-size: 1.3em;
+    .main-content {
+      flex: 1;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      background: #0f1419;
+    }
+    
+    .upload-section {
+      background: #1a2332;
+      border-bottom: 1px solid rgba(100, 150, 170, 0.15);
+      padding: 16px 20px;
+    }
+    
+    .upload-section h3 {
+      font-size: 14px;
+      color: #a8c5d1;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    
+    .input-group {
+      display: flex;
       gap: 10px;
     }
     
-    .subtitle {
-      font-size: 0.9em; 
-      color: #7a9ca8; 
-      margin: -8px 0 15px 0;
+    input[type="file"] {
+      flex: 1;
+      padding: 8px 12px;
+      background: #0f1419;
+      border: 1px solid rgba(100, 150, 170, 0.25);
+      border-radius: 6px;
+      color: #a8c5d1;
+      font-size: 13px;
     }
     
-    #messages { 
-      height: 450px; 
-      overflow-y: auto; 
-      border: 1px solid rgba(100, 150, 170, 0.3); 
-      padding: 20px; 
-      margin-bottom: 20px; 
-      border-radius: 12px;
-      background: rgba(15, 25, 35, 0.6);
+    .upload-btn {
+      padding: 8px 16px;
+      background: #1a4d5e;
+      color: #e3e8ec;
+      border: 1px solid rgba(100, 150, 170, 0.25);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    
+    .upload-btn:hover {
+      background: #2d6a7a;
+    }
+    
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     
     #messages::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
     
     #messages::-webkit-scrollbar-track {
-      background: rgba(30, 45, 55, 0.5);
-      border-radius: 10px;
+      background: transparent;
     }
     
     #messages::-webkit-scrollbar-thumb {
-      background: rgba(100, 150, 170, 0.5);
-      border-radius: 10px;
+      background: rgba(100, 150, 170, 0.3);
+      border-radius: 3px;
     }
     
-    #messages::-webkit-scrollbar-thumb:hover {
-      background: rgba(100, 150, 170, 0.8);
-    }
-    
-    .message { 
-      margin-bottom: 16px; 
-      padding: 12px 18px; 
-      border-radius: 18px;
-      max-width: 80%;
-      word-wrap: break-word;
-      animation: messageSlide 0.3s ease-out;
-    }
-    
-    @keyframes messageSlide {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .user { 
-      background: linear-gradient(135deg, #2d6a7a 0%, #1a4d5e 100%);
-      color: #e0f2f7; 
-      margin-left: auto;
-      box-shadow: 0 4px 12px rgba(42, 106, 122, 0.4);
-      border: 1px solid rgba(100, 150, 170, 0.3);
-    }
-    
-    .assistant { 
-      background: rgba(30, 50, 60, 0.7);
-      color: #c5dae0;
-      border: 1px solid rgba(100, 150, 170, 0.3);
-      margin-right: auto;
-    }
-    
-    .input-group { 
-      display: flex; 
+    .message {
+      display: flex;
       gap: 12px;
-      align-items: center;
+      max-width: 800px;
     }
     
-    input[type="text"] { 
-      flex: 1; 
-      padding: 14px 18px; 
-      border: 1px solid rgba(100, 150, 170, 0.3); 
-      border-radius: 12px;
-      font-size: 15px;
-      transition: all 0.3s ease;
-      background: rgba(15, 25, 35, 0.8);
-      color: #e0f2f7;
+    .message.user {
+      margin-left: auto;
+      flex-direction: row-reverse;
     }
     
-    input[type="text"]:focus {
-      outline: none;
-      border-color: #2a6a7a;
-      box-shadow: 0 0 0 3px rgba(42, 106, 122, 0.2);
-    }
-    
-    input[type="file"] {
-      padding: 10px;
-      border: 1px dashed rgba(100, 150, 170, 0.5);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: rgba(15, 25, 35, 0.6);
-      color: #a8c5d1;
-    }
-    
-    input[type="file"]:hover {
-      border-color: #2a6a7a;
-      background: rgba(30, 50, 60, 0.8);
-    }
-    
-    button { 
-      padding: 14px 28px; 
-      background: linear-gradient(135deg, #1a4d5e 0%, #2d6a7a 100%);
-      color: #e0f2f7; 
-      border: none; 
-      border-radius: 12px; 
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 15px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(42, 106, 122, 0.3);
-      border: 1px solid rgba(100, 150, 170, 0.2);
-    }
-    
-    button:hover { 
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(42, 106, 122, 0.5);
-      background: linear-gradient(135deg, #2d6a7a 0%, #1a4d5e 100%);
-    }
-    
-    button:active {
-      transform: translateY(0);
-    }
-    
-    .status { 
-      margin-top: 12px; 
-      padding: 12px 16px; 
-      border-radius: 10px; 
-      font-size: 14px;
-      animation: fadeIn 0.3s ease-in;
-    }
-    
-    .status.success { 
-      background: #c6f6d5; 
-      color: #22543d;
-      border-left: 4px solid #38a169;
-    }
-    
-    .status.error { 
-      background: #fed7d7; 
-      color: #742a2a;
-      border-left: 4px solid #e53e3e;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #667eea;
+    .message-avatar {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
     }
     
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .message.user .message-avatar {
+      background: #2d6a7a;
     }
     
-    .progress-bar {
-      margin: 15px 0;
-      background: #e2e8f0;
-      border-radius: 10px;
-      height: 6px;
-      overflow: hidden;
-      display: none;
+    .message.assistant .message-avatar {
+      background: #1a4d5e;
     }
     
-    .progress-bar.active {
-      display: block;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #1a4d5e, #2d6a7a, #3d8a9a);
-      width: 0%;
-      transition: width 0.3s ease;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    
-    .status-text {
-      text-align: center;
-      color: #a8c5d1;
+    .message-content {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.6;
       font-size: 14px;
-      margin-top: 8px;
-      display: none;
-      font-family: 'Courier New', monospace;
     }
     
-    .status-text.active {
-      display: block;
+    .message.user .message-content {
+      background: #2d6a7a;
+      color: #e3e8ec;
+    }
+    
+    .message.assistant .message-content {
+      background: #1a2332;
+      color: #c5dae0;
+      border: 1px solid rgba(100, 150, 170, 0.15);
+    }
+    
+    .feedback-buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+    
+    .feedback-btn {
+      padding: 4px 8px;
+      background: transparent;
+      border: 1px solid rgba(100, 150, 170, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    
+    .feedback-btn:hover {
+      background: rgba(45, 70, 85, 0.3);
+      transform: scale(1.1);
+    }
+    
+    .feedback-btn.selected {
+      background: #1a4d5e;
+      border-color: #2d6a7a;
+    }
+    
+    .input-area {
+      padding: 16px 20px 20px;
+      background: #1a2332;
+      border-top: 1px solid rgba(100, 150, 170, 0.15);
     }
     
     .telemetry-box {
       background: rgba(15, 25, 35, 0.8);
-      border: 1px solid rgba(100, 150, 170, 0.2);
+      border: 1px solid rgba(100, 150, 170, 0.15);
       border-radius: 8px;
       padding: 12px;
-      margin: 10px 0;
+      margin-bottom: 12px;
       font-family: 'Courier New', monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: #7a9ca8;
+      max-height: 200px;
+      overflow-y: auto;
       display: none;
     }
     
@@ -373,104 +297,155 @@
       display: block;
     }
     
+    .telemetry-title {
+      color: #a8c5d1;
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    
     .stage-item {
-      padding: 4px 0;
+      padding: 3px 0;
       display: flex;
       justify-content: space-between;
+      line-height: 1.5;
     }
     
-    .stage-item.completed {
-      color: #5db88f;
+    .stage-item.completed { color: #5db88f; }
+    .stage-item.current { color: #3d8a9a; font-weight: bold; }
+    .stage-item.pending { color: #5a6a75; }
+    
+    .progress-bar {
+      height: 3px;
+      background: rgba(30, 45, 55, 0.5);
+      margin-bottom: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
     }
     
-    .stage-item.current {
-      color: #3d8a9a;
-      font-weight: bold;
+    .progress-bar.active { display: block; }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a4d5e, #2d6a7a, #3d8a9a);
+      width: 0%;
+      transition: width 0.3s ease;
     }
     
-    .stage-item.pending {
-      color: #5a6a75;
-    }
-    
-    .feedback-buttons {
+    .chat-input-wrapper {
       display: flex;
-      gap: 8px;
-      margin-top: 8px;
-      justify-content: flex-end;
-      opacity: 0;
-      animation: fadeIn 0.5s ease-in forwards;
-      animation-delay: 0.3s;
+      gap: 12px;
+      align-items: flex-end;
     }
     
-    .feedback-btn {
-      padding: 6px 12px;
-      background: white;
-      border: 2px solid #e2e8f0;
+    #messageInput {
+      flex: 1;
+      padding: 12px 16px;
+      background: #0f1419;
+      border: 1px solid rgba(100, 150, 170, 0.25);
+      border-radius: 8px;
+      color: #e3e8ec;
+      font-size: 14px;
+      resize: none;
+      min-height: 50px;
+      max-height: 150px;
+      font-family: inherit;
+    }
+    
+    #messageInput:focus {
+      outline: none;
+      border-color: #2a6a7a;
+      box-shadow: 0 0 0 2px rgba(42, 106, 122, 0.15);
+    }
+    
+    #sendBtn {
+      padding: 12px 24px;
+      background: #1a4d5e;
+      color: #e3e8ec;
+      border: 1px solid rgba(100, 150, 170, 0.25);
       border-radius: 8px;
       cursor: pointer;
-      font-size: 18px;
-      transition: all 0.2s ease;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      height: 50px;
     }
     
-    .feedback-btn:hover {
-      transform: scale(1.15);
-      border-color: #667eea;
+    #sendBtn:hover:not(:disabled) {
+      background: #2d6a7a;
     }
     
-    .feedback-btn.selected {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-color: #667eea;
-      transform: scale(1.2);
+    #sendBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
-    .message-container {
-      display: flex;
-      flex-direction: column;
+    .status {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-top: 8px;
     }
     
-    .assistant .message-container {
-      align-items: flex-start;
+    .status.success {
+      background: rgba(93, 184, 143, 0.15);
+      color: #5db88f;
+      border: 1px solid rgba(93, 184, 143, 0.3);
+    }
+    
+    .status.error {
+      background: rgba(224, 108, 117, 0.15);
+      color: #e06c75;
+      border: 1px solid rgba(224, 108, 117, 0.3);
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🤖 Agent1</h1>
-    <p>Chat Inteligente com RAG • Qwen2.5:14b • Modo Treinamento Ativo</p>
+    <h1>🤖 Agent1 <span class="version">v0.5.1</span></h1>
+    <p>Modo Treinamento • Qwen2.5:14b • Knowledge Base Ativa</p>
   </div>
 
   <div class="container">
     <div class="sidebar">
-      <button class="new-chat-btn" onclick="startNewChat()">➕ Nova Conversa</button>
-      <h3>💬 Histórico</h3>
-      <div id="conversationsList"></div>
+      <div class="sidebar-header">
+        <button class="new-chat-btn" onclick="startNewChat()">➕ Nova Conversa</button>
+      </div>
+      <div class="conversations-list" id="conversationsList"></div>
     </div>
 
     <div class="main-content">
       <div class="upload-section">
         <h3>📄 Biblioteca de Conhecimento</h3>
-        <p class="subtitle">Envie PDFs ou arquivos de texto para o agente aprender automaticamente</p>
         <div class="input-group">
           <input type="file" id="fileInput" accept=".pdf,.txt,.md">
-          <button onclick="uploadDocument()">📤 Enviar Documento</button>
+          <button class="upload-btn" onclick="uploadDocument()">📤 Enviar</button>
         </div>
         <div id="uploadStatus"></div>
       </div>
 
-      <div class="chat-section">
-        <h3>💬 Conversa - Modo Treinamento</h3>
-        <div class="progress-bar" id="progressBar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="status-text" id="statusText"></div>
-        <div class="telemetry-box" id="telemetryBox">
-          <div style="margin-bottom: 8px; color: #a8c5d1; font-weight: bold;">⏱️ Telemetria em Tempo Real</div>
-          <div id="telemetryStages"></div>
-        </div>
+      <div class="chat-container">
         <div id="messages"></div>
-        <div class="input-group">
-          <input type="text" id="messageInput" placeholder="Digite sua mensagem ou pergunte sobre seus documentos..." onkeypress="if(event.key==='Enter') sendMessage()">
-          <button id="sendBtn" onclick="sendMessage()">Enviar ✈️</button>
+        
+        <div class="input-area">
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          
+          <div class="telemetry-box" id="telemetryBox">
+            <div class="telemetry-title">⏱️ Telemetria</div>
+            <div id="telemetryStages"></div>
+          </div>
+          
+          <div class="chat-input-wrapper">
+            <textarea 
+              id="messageInput" 
+              placeholder="Digite sua mensagem..."
+              onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"
+            ></textarea>
+            <button id="sendBtn" onclick="sendMessage()">Enviar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -478,17 +453,24 @@
 
   <script>
     let conversationId = null;
-    let currentMessageId = null;
     let conversations = [];
+    let stageStartTimes = {};
+    let currentStageIndex = 0;
 
-    // Carregar histórico ao iniciar
+    const stages = [
+      { key: 'create_conversation', label: 'Criar conversa' },
+      { key: 'save_user_message', label: 'Salvar mensagem' },
+      { key: 'load_history', label: 'Carregar histórico' },
+      { key: 'search_documents', label: 'Buscar documentos' },
+      { key: 'search_knowledge_base', label: 'Consultar KB' },
+      { key: 'prepare_context', label: 'Preparar contexto' },
+      { key: 'llm_generation', label: 'Gerar resposta (LLM)' },
+      { key: 'save_assistant_message', label: 'Salvar resposta' },
+    ];
+
     window.addEventListener('DOMContentLoaded', () => {
       loadConversations();
     });
-
-    function getUserRole() {
-      return 'admin'; // Sempre admin para treinamento
-    }
 
     async function loadConversations() {
       try {
@@ -503,30 +485,17 @@
 
     function renderConversationsList() {
       const list = document.getElementById('conversationsList');
-      list.innerHTML = '';
-
       if (conversations.length === 0) {
-        list.innerHTML = '<p style="color: #a0aec0; font-size: 0.85em; text-align: center;">Nenhuma conversa ainda</p>';
+        list.innerHTML = '<div style="padding: 20px; text-align: center; color: #5a6a75; font-size: 12px;">Nenhuma conversa</div>';
         return;
       }
 
-      conversations.slice(0, 20).forEach(conv => {
-        const item = document.createElement('div');
-        item.className = 'conversation-item' + (conv.id === conversationId ? ' active' : '');
-        item.onclick = () => loadConversation(conv.id);
-        
-        const title = document.createElement('div');
-        title.className = 'conversation-title';
-        title.textContent = conv.title || 'Nova conversa';
-        
-        const date = document.createElement('div');
-        date.className = 'conversation-date';
-        date.textContent = new Date(conv.createdAt).toLocaleDateString('pt-BR');
-        
-        item.appendChild(title);
-        item.appendChild(date);
-        list.appendChild(item);
-      });
+      list.innerHTML = conversations.slice(0, 30).map(conv => `
+        <div class="conversation-item ${conv.id === conversationId ? 'active' : ''}" onclick="loadConversation('${conv.id}')">
+          <div class="conversation-title">${conv.title || 'Nova conversa'}</div>
+          <div class="conversation-date">${new Date(conv.createdAt).toLocaleDateString('pt-BR')}</div>
+        </div>
+      `).join('');
     }
 
     async function loadConversation(id) {
@@ -534,11 +503,9 @@
         conversationId = id;
         renderConversationsList();
 
-        // Buscar mensagens
-        const res = await fetch(`/api/conversations/${id}/messages`);
+        const res = await fetch(\`/api/conversations/\${id}/messages\`);
         const data = await res.json();
         
-        // Limpar e renderizar mensagens
         document.getElementById('messages').innerHTML = '';
         data.messages.forEach(msg => {
           addMessage(msg.role, msg.content, msg.id);
@@ -554,116 +521,76 @@
       renderConversationsList();
     }
 
-    const stages = [
-      { key: 'create_conversation', label: 'Criar/carregar conversa', weight: 5 },
-      { key: 'save_user_message', label: 'Salvar mensagem', weight: 5 },
-      { key: 'load_history', label: 'Carregar histórico', weight: 10 },
-      { key: 'search_documents', label: 'Buscar documentos', weight: 15 },
-      { key: 'search_knowledge_base', label: 'Consultar KB', weight: 15 },
-      { key: 'prepare_context', label: 'Preparar contexto', weight: 5 },
-      { key: 'llm_generation', label: 'Gerar resposta (LLM)', weight: 40 },
-      { key: 'save_assistant_message', label: 'Salvar resposta', weight: 5 },
-    ];
-
-    let currentStageIndex = 0;
-    let stageStartTimes = {};
-
     function showTelemetry() {
       const box = document.getElementById('telemetryBox');
       const stagesDiv = document.getElementById('telemetryStages');
       box.classList.add('active');
       
       stagesDiv.innerHTML = stages.map((stage, idx) => 
-        `<div class="stage-item pending" id="stage-${stage.key}">
-          <span>${idx + 1}. ${stage.label}</span>
-          <span class="stage-time">⏳ aguardando</span>
-        </div>`
+        \`<div class="stage-item pending" id="stage-\${stage.key}">
+          <span>\${idx + 1}. \${stage.label}</span>
+          <span class="stage-time">aguardando</span>
+        </div>\`
       ).join('');
     }
 
     function hideTelemetry() {
-      const box = document.getElementById('telemetryBox');
-      box.classList.remove('active');
+      document.getElementById('telemetryBox').classList.remove('active');
     }
 
-    function updateStage(stageKey, status = 'current', duration = null) {
-      const stageEl = document.getElementById(`stage-${stageKey}`);
-      if (!stageEl) return;
+    function updateStage(stageKey, status, duration = null) {
+      const el = document.getElementById(\`stage-\${stageKey}\`);
+      if (!el) return;
       
-      stageEl.className = `stage-item ${status}`;
+      el.className = \`stage-item \${status}\`;
+      const timeEl = el.querySelector('.stage-time');
       
       if (status === 'current') {
         stageStartTimes[stageKey] = Date.now();
-        const timeEl = stageEl.querySelector('.stage-time');
-        timeEl.textContent = '⏳ em andamento...';
+        timeEl.textContent = 'processando...';
       } else if (status === 'completed') {
         const elapsed = duration || (Date.now() - (stageStartTimes[stageKey] || Date.now()));
-        const timeEl = stageEl.querySelector('.stage-time');
-        timeEl.textContent = `✓ ${elapsed}ms`;
+        timeEl.textContent = \`✓ \${elapsed}ms\`;
       }
-    }
-
-    function showProgress(text, percent = 0) {
-      const bar = document.getElementById('progressBar');
-      const fill = document.getElementById('progressFill');
-      const status = document.getElementById('statusText');
-      
-      bar.classList.add('active');
-      status.classList.add('active');
-      status.textContent = text;
-      fill.style.width = percent + '%';
-    }
-
-    function hideProgress() {
-      const bar = document.getElementById('progressBar');
-      const status = document.getElementById('statusText');
-      bar.classList.remove('active');
-      status.classList.remove('active');
     }
 
     function addMessage(role, content, messageId = null) {
       const messagesDiv = document.getElementById('messages');
-      const containerDiv = document.createElement('div');
-      containerDiv.className = 'message ' + role;
-      containerDiv.dataset.messageId = messageId;
+      const messageEl = document.createElement('div');
+      messageEl.className = \`message \${role}\`;
+      
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = role === 'user' ? '👤' : '🤖';
       
       const contentDiv = document.createElement('div');
-      contentDiv.className = 'message-container';
+      contentDiv.className = 'message-content';
       contentDiv.textContent = content;
       
-      // Adicionar feedback apenas para assistant
       if (role === 'assistant' && messageId) {
         const feedbackDiv = document.createElement('div');
         feedbackDiv.className = 'feedback-buttons';
-        
-        const emojis = ['😞', '😕', '😐', '🙂', '😍'];
-        for (let i = 1; i <= 5; i++) {
+        ['😞', '😕', '😐', '🙂', '😍'].forEach((emoji, i) => {
           const btn = document.createElement('button');
           btn.className = 'feedback-btn';
-          btn.textContent = emojis[i-1];
-          btn.title = `Avaliar com ${i} estrela${i>1?'s':''}`;
-          btn.onclick = () => submitFeedback(messageId, i, btn);
+          btn.textContent = emoji;
+          btn.onclick = () => submitFeedback(messageId, i + 1, btn);
           feedbackDiv.appendChild(btn);
-        }
-        
+        });
         contentDiv.appendChild(feedbackDiv);
       }
       
-      containerDiv.appendChild(contentDiv);
-      messagesDiv.appendChild(containerDiv);
+      messageEl.appendChild(avatar);
+      messageEl.appendChild(contentDiv);
+      messagesDiv.appendChild(messageEl);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      
-      return messageId;
     }
 
     async function submitFeedback(messageId, score, btn) {
       try {
-        // Marcar visualmente
-        const allBtns = btn.parentElement.querySelectorAll('.feedback-btn');
-        allBtns.forEach(b => b.classList.remove('selected'));
+        btn.parentElement.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         
-        // Enviar ao servidor
         await fetch('/api/messages/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -680,83 +607,66 @@
       const message = input.value.trim();
       if (!message) return;
 
-      const userRole = getUserRole();
       addMessage('user', message);
       input.value = '';
       sendBtn.disabled = true;
 
-      // Mostrar telemetria
       showTelemetry();
+      document.getElementById('progressBar').classList.add('active');
+      document.getElementById('progressFill').style.width = '0%';
       currentStageIndex = 0;
 
       try {
-        showProgress('🚀 Processando...', 0);
-        
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
-        
-        // Simular progresso baseado em etapas esperadas
         const progressInterval = setInterval(() => {
           if (currentStageIndex < stages.length) {
-            const accumulatedWeight = stages.slice(0, currentStageIndex + 1).reduce((sum, s) => sum + s.weight, 0);
-            showProgress(stages[currentStageIndex].label, accumulatedWeight);
+            const progress = ((currentStageIndex + 1) / stages.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
             updateStage(stages[currentStageIndex].key, 'current');
-            
             if (currentStageIndex > 0) {
               updateStage(stages[currentStageIndex - 1].key, 'completed');
             }
-            
             currentStageIndex++;
           }
-        }, 2000);
+        }, 3000);
+        
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 90000);
         
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId, message, userRole }),
+          body: JSON.stringify({ conversationId, message }),
           signal: controller.signal,
         });
 
         clearInterval(progressInterval);
         clearTimeout(timeout);
-        
-        // Marcar todas como completadas
-        stages.forEach(stage => updateStage(stage.key, 'completed'));
-        showProgress('✅ Concluído!', 100);
 
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
         conversationId = data.conversationId;
-        const msgId = `msg-${Date.now()}`;
-        addMessage('assistant', data.assistantMessage, msgId);
+        addMessage('assistant', data.assistantMessage, \`msg-\${Date.now()}\`);
         
-        // Mostrar telemetria real se disponível
         if (data.telemetry) {
-          console.log('Telemetria:', data.telemetry);
-          // Atualizar com tempos reais
           Object.entries(data.telemetry.stages).forEach(([name, stageData]) => {
-            if (stageData.duration) {
-              updateStage(name, 'completed', stageData.duration);
-            }
+            if (stageData.duration) updateStage(name, 'completed', stageData.duration);
           });
+        } else {
+          stages.forEach(s => updateStage(s.key, 'completed'));
         }
         
-        // Recarregar histórico
+        document.getElementById('progressFill').style.width = '100%';
         loadConversations();
         
         setTimeout(() => {
-          hideProgress();
+          document.getElementById('progressBar').classList.remove('active');
           hideTelemetry();
         }, 3000);
       } catch (error) {
-        hideProgress();
+        document.getElementById('progressBar').classList.remove('active');
         hideTelemetry();
-        if (error.name === 'AbortError') {
-          addMessage('assistant', `⏱️ Timeout: A resposta demorou muito (>90s). Tente novamente ou simplifique a pergunta.`);
-        } else {
-          addMessage('assistant', `❌ Erro: ${error.message}`);
-        }
+        addMessage('assistant', \`❌ Erro: \${error.message}\`);
       } finally {
         sendBtn.disabled = false;
       }
@@ -772,14 +682,10 @@
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('userRole', getUserRole());
 
-      showUploadStatus('📄 Lendo arquivo...', 'success');
+      showUploadStatus('Processando...', 'success');
 
       try {
-        setTimeout(() => showUploadStatus('✂️ Dividindo em chunks...', 'success'), 500);
-        setTimeout(() => showUploadStatus('🧠 Gerando embeddings...', 'success'), 1500);
-        
         const res = await fetch('/api/documents/upload', {
           method: 'POST',
           body: formData,
@@ -788,10 +694,10 @@
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        showUploadStatus(`✅ ${data.filename} processado (${data.chunksCount} chunks). Agente aprendeu o conteúdo!`, 'success');
+        showUploadStatus(\`✅ \${data.filename} processado (\${data.chunksCount} chunks)\`, 'success');
         fileInput.value = '';
       } catch (error) {
-        showUploadStatus(`❌ Erro: ${error.message}`, 'error');
+        showUploadStatus(\`❌ \${error.message}\`, 'error');
       }
     }
 
@@ -804,4 +710,3 @@
   </script>
 </body>
 </html>
-
