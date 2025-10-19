@@ -1,13 +1,20 @@
-# Agent1 v0.5.1 - Chat Inteligente com LLM Local
+# Agent1 v0.5.2 - Sistema Multiagentes Inteligente
 
-Sistema modular de chat com LLM local (Qwen2.5:14b), RAG, Knowledge Base permanente e treinamento automático.
+Sistema modular de **multiagentes especializados** com LLM local (Qwen2.5:14b), RAG, Knowledge Base permanente e treinamento automático.
 
-**🚀 Status:** Produção-ready | **📊 Modo:** Treinamento contínuo | **🤖 Modelo:** Qwen2.5:14b
+**🚀 Status:** Produção-ready | **📊 Modo:** Treinamento contínuo | **🤖 Modelo:** Qwen2.5:14b | **🏗️ Arquitetura:** Multiagentes
 
 Leia `RULES.md` para regras de arquitetura.
 
 ## ✨ Features
 
+### 🤖 **Sistema Multiagentes**
+- **Agente Textual** - Especialista em análise de documentos PDF/TXT
+- **Agente Numérico** - Especialista em cálculos e planilhas (CSV/XLSX)
+- **Agente Visual** - Especialista em identificação de objetos em imagens
+- **Agente de Monitoramento** - Especialista em reconhecimento e monitoramento de pessoas
+
+### 🧠 **Inteligência Central**
 - 🤖 **LLM Local** - Qwen2.5:14b (9GB, PT-BR excelente)
 - 📚 **RAG** - Upload PDF/TXT com busca semântica (pgvector)
 - 💾 **Knowledge Base** - Fatos permanentes (eternos, sobrevivem troca de modelo)

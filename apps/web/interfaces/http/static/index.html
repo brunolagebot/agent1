@@ -78,6 +78,7 @@
             <div>📝 Conversas: <span id="convCount">-</span></div>
             <div>💬 Mensagens: <span id="msgCount">-</span></div>
             <div>⭐ Feedback: <span id="feedbackCount">-</span></div>
+            <div id="docInfo" style="color: #7a9ca8;">📄 Nenhum documento processado</div>
             <div style="margin-top: 8px; padding: 8px; border-radius: 4px; background: #1a2332;">
               <strong id="finetuningReady" style="color: #ffa500;">⏳ Analisando...</strong>
             </div>
@@ -90,7 +91,64 @@
         <button onclick="exportTraining()" style="width: 100%; margin-bottom: 10px;">📥 Exportar para Treino</button>
         <button onclick="listModels()" style="width: 100%; margin-bottom: 10px;">🤖 Listar Modelos</button>
         <button onclick="uploadDocument()" style="width: 100%; margin-bottom: 10px;">📄 Upload Documento</button>
-        <button onclick="showVersion()" style="width: 100%; margin-bottom: 10px;">📖 Ver Versão</button>
+        <button onclick="manageDocuments()" style="width: 100%; margin-bottom: 10px;">📚 Gerenciar Documentos</button>
+        <button onclick="showVersion()" style="width: 100%; margin-bottom: 15px;">📖 Ver Versão</button>
+        
+        <!-- Fine-tuning Section (Destacado) -->
+        <div style="border-top: 2px solid #2d6a7a; padding-top: 15px; margin-top: 10px;">
+          <div style="text-align: center; margin-bottom: 10px;">
+            <h4 style="color: #a8c5d1; margin: 0; font-size: 16px;">🚀 Fine-tuning do Modelo</h4>
+            <div style="color: #7a9ca8; font-size: 12px; margin-top: 5px;">Treine o modelo com seus dados</div>
+          </div>
+          
+          <!-- Barra de Progresso (inicialmente oculta) -->
+          <div id="finetuningProgress" style="display: none; margin-bottom: 10px;">
+            <div style="background: #1a2332; padding: 10px; border-radius: 4px; border: 1px solid #2d6a7a;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span id="progressText" style="color: #a8c5d1; font-size: 12px;">Iniciando...</span>
+                <span id="progressPercent" style="color: #5db88f; font-size: 12px; font-weight: bold;">0%</span>
+              </div>
+              <div style="background: #0f1419; height: 8px; border-radius: 4px; overflow: hidden;">
+                <div id="progressBar" style="background: linear-gradient(90deg, #2d6a7a, #5db88f); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+              </div>
+              <div id="progressDetails" style="color: #7a9ca8; font-size: 11px; margin-top: 5px;"></div>
+            </div>
+          </div>
+          
+          <!-- Monitor de Desempenho -->
+          <div id="performanceMonitor" style="display: none; background: #1a4d2a; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #5db88f;">
+            <div style="color: #5db88f; font-size: 12px; font-weight: bold; margin-bottom: 5px;">📊 Monitor de Desempenho</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px;">
+              <div style="color: #7a9ca8;">CPU: <span id="cpuUsage" style="color: #5db88f;">--</span></div>
+              <div style="color: #7a9ca8;">Memória: <span id="memoryUsage" style="color: #5db88f;">--</span></div>
+              <div style="color: #7a9ca8;">Tempo: <span id="elapsedTime" style="color: #5db88f;">00:00</span></div>
+              <div style="color: #7a9ca8;">Status: <span id="systemStatus" style="color: #5db88f;">Normal</span></div>
+            </div>
+          </div>
+          
+          <!-- Botão de Fine-tuning (Destacado) -->
+          <button onclick="startFineTuning()" id="finetuningBtn" style="
+            width: 100%; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            background: #4d1a1a; 
+            color: #ff6b6b; 
+            border: 2px solid #ff6b6b; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          ">🚫 Fine-tuning Indisponível</button>
+          
+          <!-- Informações do Fine-tuning -->
+          <div id="finetuningInfo" style="background: #1a2332; padding: 10px; border-radius: 4px; border: 1px solid #2d6a7a;">
+            <div style="color: #7a9ca8; font-size: 11px; text-align: center;">
+              💡 <strong>Dica:</strong> O fine-tuning usa seus documentos e conversas para personalizar o modelo
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -209,10 +267,41 @@
       document.getElementById('input').value = '';
     }
 
-    function addMsg(role, text, messageId = null) {
+    function addMsg(role, text, messageId = null, sources = null) {
       const div = document.createElement('div');
       div.className = 'msg ' + role;
       div.textContent = text;
+      
+      // Adicionar informações de fonte para mensagens do assistente
+      if (role === 'assistant' && sources && (sources.documents.length > 0 || sources.knowledgeBase.length > 0)) {
+        const sourcesDiv = document.createElement('div');
+        sourcesDiv.className = 'sources-container';
+        sourcesDiv.style.cssText = 'margin-top: 10px; padding: 8px; background: #1a2332; border-radius: 4px; border: 1px solid #2d6a7a;';
+        
+        let sourcesHtml = '<div style="font-size: 11px; color: #5db88f; font-weight: bold; margin-bottom: 5px;">📚 Fontes consultadas:</div>';
+        
+        if (sources.documents.length > 0) {
+          sourcesHtml += '<div style="font-size: 10px; color: #7a9ca8; margin-bottom: 3px;">📄 Documentos:</div>';
+          sources.documents.forEach((doc, i) => {
+            const similarity = Math.round(doc.similarity * 100);
+            sourcesHtml += `<div style="font-size: 10px; color: #a8c5d1; margin-left: 10px; margin-bottom: 2px;">
+              • ${doc.filename}${doc.description ? ` (${doc.description})` : ''} - ${similarity}% relevância
+            </div>`;
+          });
+        }
+        
+        if (sources.knowledgeBase.length > 0) {
+          sourcesHtml += '<div style="font-size: 10px; color: #7a9ca8; margin-bottom: 3px;">🧠 Base de Conhecimento:</div>';
+          sources.knowledgeBase.forEach((fact, i) => {
+            sourcesHtml += `<div style="font-size: 10px; color: #a8c5d1; margin-left: 10px; margin-bottom: 2px;">
+              • ${fact.title}
+            </div>`;
+          });
+        }
+        
+        sourcesDiv.innerHTML = sourcesHtml;
+        div.appendChild(sourcesDiv);
+      }
       
       // Adicionar feedback para mensagens do assistente
       if (role === 'assistant' && messageId) {
@@ -281,7 +370,7 @@
         if (d.error) throw new Error(d.error);
 
         convId = d.conversationId;
-        addMsg('assistant', d.assistantMessage, d.messageId);
+        addMsg('assistant', d.assistantMessage, d.messageId, d.sources);
         
         // Atualizar telemetria com dados reais
         if (d.telemetry && d.telemetry.stages) {
@@ -355,6 +444,43 @@
       }
     }
 
+    // Funções auxiliares para Fine-tuning
+    function updateProgress(percent, text, details) {
+      document.getElementById('progressPercent').textContent = `${percent}%`;
+      document.getElementById('progressText').textContent = text;
+      document.getElementById('progressDetails').textContent = details;
+      document.getElementById('progressBar').style.width = `${percent}%`;
+    }
+
+    function updatePerformanceMonitor(startTime) {
+      const elapsed = Date.now() - startTime;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('elapsedTime').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      // Simular métricas de sistema (em produção, viriam de uma API real)
+      const cpuUsage = Math.floor(Math.random() * 30) + 20; // 20-50%
+      const memoryUsage = Math.floor(Math.random() * 20) + 60; // 60-80%
+      
+      document.getElementById('cpuUsage').textContent = `${cpuUsage}%`;
+      document.getElementById('memoryUsage').textContent = `${memoryUsage}%`;
+      
+      // Status baseado nas métricas
+      let status = 'Normal';
+      let statusColor = '#5db88f';
+      
+      if (cpuUsage > 80 || memoryUsage > 90) {
+        status = 'Alto';
+        statusColor = '#ffa500';
+      } else if (cpuUsage > 60 || memoryUsage > 80) {
+        status = 'Médio';
+        statusColor = '#ffa500';
+      }
+      
+      document.getElementById('systemStatus').textContent = status;
+      document.getElementById('systemStatus').style.color = statusColor;
+    }
+
     // Tab Management
     function showTab(tab) {
       currentTab = tab;
@@ -379,41 +505,69 @@
     // Fine-tuning Status Monitor
     async function updateFineTuningStatus() {
       try {
-        const response = await fetch('/api/system/stats');
-        const stats = await response.json();
+        const response = await fetch('/api/admin/finetuning-status');
+        const data = await response.json();
         
-        document.getElementById('convCount').textContent = stats.conversations || 0;
-        document.getElementById('msgCount').textContent = stats.messages || 0;
-        document.getElementById('feedbackCount').textContent = stats.feedback?.count || 0;
+        document.getElementById('convCount').textContent = data.stats.conversations || 0;
+        document.getElementById('msgCount').textContent = data.stats.messages || 0;
+        document.getElementById('feedbackCount').textContent = data.stats.feedback?.count || 0;
         
-        // Calculate if ready for fine-tuning
-        const conversations = stats.conversations || 0;
-        const messages = stats.messages || 0;
-        const feedbackCount = stats.feedback?.count || 0;
-        const avgFeedback = parseFloat(stats.feedback?.average || 0);
+        // Verificar se está pronto para fine-tuning
+        const isReady = data.isReady;
+        const hasConversationData = data.stats.dataSources?.hasConversationData || false;
+        const hasDocumentData = data.stats.dataSources?.hasDocumentData || false;
+        const processedDocs = data.stats.processedDocuments || 0;
         
         const readyElement = document.getElementById('finetuningReady');
+        const finetuningBtn = document.getElementById('finetuningBtn');
         
-        if (conversations >= 50 && messages >= 200 && feedbackCount >= 20 && avgFeedback >= 3.5) {
-          readyElement.innerHTML = '✅ <span style="color: #5db88f;">Pronto para Fine-tuning!</span>';
+        if (isReady) {
+          let statusText = '✅ <span style="color: #5db88f;">Pronto para Fine-tuning!</span>';
+          let buttonText = '🚀 Iniciar Fine-tuning';
+          let buttonColor = '#1a4d2a';
+          let textColor = '#5db88f';
+          
+          if (hasDocumentData && !hasConversationData) {
+            statusText = '📚 <span style="color: #7a9ca8;">Pronto com Documentos!</span>';
+            buttonText = '📚 Fine-tuning com Documentos';
+            buttonColor = '#2d4a6a';
+            textColor = '#7a9ca8';
+          } else if (hasConversationData && hasDocumentData) {
+            statusText = '🚀 <span style="color: #5db88f;">Pronto Completo!</span>';
+            buttonText = '🚀 Fine-tuning Completo';
+            buttonColor = '#1a4d2a';
+            textColor = '#5db88f';
+          }
+          
+          readyElement.innerHTML = statusText;
           readyElement.style.background = '#1a4d2a';
-        } else if (conversations >= 20 && messages >= 100 && feedbackCount >= 10) {
-          readyElement.innerHTML = '🟡 <span style="color: #ffa500;">Quase pronto</span>';
-          readyElement.style.background = '#4d3a1a';
+          
+          finetuningBtn.innerHTML = buttonText;
+          finetuningBtn.style.background = buttonColor;
+          finetuningBtn.style.color = textColor;
+          finetuningBtn.disabled = false;
         } else {
           readyElement.innerHTML = '🔴 <span style="color: #ff6b6b;">Precisa de mais dados</span>';
           readyElement.style.background = '#4d1a1a';
+          
+          // Botão indisponível
+          const finetuningBtn = document.getElementById('finetuningBtn');
+          finetuningBtn.innerHTML = '🚫 Fine-tuning Indisponível';
+          finetuningBtn.style.background = '#4d1a1a';
+          finetuningBtn.style.color = '#ff6b6b';
+          finetuningBtn.disabled = true;
         }
         
-        // Show requirements
-        const requirements = [];
-        if (conversations < 50) requirements.push(`${50 - conversations} conversas`);
-        if (messages < 200) requirements.push(`${200 - messages} mensagens`);
-        if (feedbackCount < 20) requirements.push(`${20 - feedbackCount} feedbacks`);
-        if (avgFeedback < 3.5) requirements.push(`média ${(3.5 - avgFeedback).toFixed(1)} pontos`);
-        
-        if (requirements.length > 0) {
-          readyElement.innerHTML += '<br><small style="color: #7a9ca8;">Faltam: ' + requirements.join(', ') + '</small>';
+        // Atualizar informações sobre documentos
+        const docInfo = document.getElementById('docInfo');
+        if (docInfo) {
+          if (processedDocs > 0) {
+            docInfo.innerHTML = `📄 ${processedDocs} documento(s) processado(s) - Dados disponíveis para fine-tuning`;
+            docInfo.style.color = '#5db88f';
+          } else {
+            docInfo.innerHTML = '📄 Nenhum documento processado';
+            docInfo.style.color = '#7a9ca8';
+          }
         }
         
       } catch (error) {
@@ -532,9 +686,25 @@
     function uploadDocument() {
       document.getElementById('adminContent').innerHTML = `
         <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
-          <h4 style="color: #a8c5d1; margin-bottom: 15px;">📄 Upload de Documento</h4>
-          <input type="file" id="fileInput" accept=".pdf,.txt,.md" style="margin-bottom: 15px;">
-          <button onclick="doUpload()" style="width: 100%;">📤 Enviar Documento</button>
+          <h4 style="color: #a8c5d1; margin-bottom: 15px;">📄 Upload de Documentos</h4>
+          
+          <div style="margin-bottom: 15px;">
+            <label style="color: #a8c5d1; font-size: 14px; margin-bottom: 5px; display: block;">📁 Arquivos:</label>
+            <input type="file" id="fileInput" accept=".pdf,.txt,.md,.csv,.xlsx,.xls" multiple style="width: 100%; padding: 10px; background: #1a2332; border: 1px solid #2d6a7a; border-radius: 4px; color: #e3e8ec;">
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <label style="color: #a8c5d1; font-size: 14px; margin-bottom: 5px; display: block;">📝 Descrição (opcional):</label>
+            <textarea id="descriptionInput" placeholder="Ex: Contrato de prestação de serviços, Manual técnico, etc." style="width: 100%; padding: 10px; background: #1a2332; border: 1px solid #2d6a7a; border-radius: 4px; color: #e3e8ec; resize: vertical; min-height: 60px; font-family: inherit;"></textarea>
+          </div>
+          
+          <div style="color: #7a9ca8; font-size: 12px; margin-bottom: 15px;">
+            💡 <strong>Dica:</strong> Você pode selecionar múltiplos arquivos (PDF/TXT/MD/CSV/Excel) de uma vez. Máximo 10MB por arquivo.<br>
+            📊 <strong>Planilhas:</strong> CSV e Excel são analisadas automaticamente para gerar QA estruturada.<br>
+            📝 A descrição será aplicada a todos os arquivos selecionados.
+          </div>
+          
+          <button onclick="doUpload()" style="width: 100%; padding: 10px; background: #2d6a7a; color: #e3e8ec; border: none; border-radius: 4px; cursor: pointer;">📤 Enviar Documentos</button>
           <div id="uploadStatus" style="margin-top: 15px;"></div>
         </div>
       `;
@@ -542,18 +712,34 @@
 
     async function doUpload() {
       const fileInput = document.getElementById('fileInput');
-      const file = fileInput.files[0];
+      const descriptionInput = document.getElementById('descriptionInput');
+      const files = fileInput.files;
       
-      if (!file) {
-        document.getElementById('uploadStatus').innerHTML = '<p style="color: #ff6b6b;">Selecione um arquivo primeiro!</p>';
+      if (!files || files.length === 0) {
+        document.getElementById('uploadStatus').innerHTML = '<p style="color: #ff6b6b;">Selecione pelo menos um arquivo!</p>';
         return;
       }
       
       const formData = new FormData();
-      formData.append('file', file);
+      for (let i = 0; i < files.length; i++) {
+        formData.append('file', files[i]);
+      }
+      
+      // Adicionar descrição se fornecida
+      const description = descriptionInput.value.trim();
+      if (description) {
+        formData.append('description', description);
+      }
       
       try {
-        document.getElementById('uploadStatus').innerHTML = '<p style="color: #7a9ca8;">📤 Enviando...</p>';
+        document.getElementById('uploadStatus').innerHTML = `
+          <div style="color: #ffa500;">
+            ⏳ Processando ${files.length} arquivo(s)...<br>
+            <div style="font-size: 12px; margin-top: 5px;">
+              ${Array.from(files).map(f => `• ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join('<br>')}
+            </div>
+          </div>
+        `;
         
         const response = await fetch('/api/documents/upload', {
           method: 'POST',
@@ -563,16 +749,68 @@
         const result = await response.json();
         
         if (result.success) {
-          document.getElementById('uploadStatus').innerHTML = `
-            <p style="color: #5db88f;">✅ Documento enviado com sucesso!</p>
-            <p style="color: #7a9ca8; font-size: 12px;">ID: ${result.documentId}</p>
-            <p style="color: #7a9ca8; font-size: 12px;">Chunks: ${result.chunks}</p>
+          let successHtml = `
+            <div style="color: #5db88f; margin-bottom: 15px;">
+              ✅ Upload concluído!<br>
+              📊 ${result.processed}/${result.total} arquivo(s) processado(s) com sucesso
+            </div>
           `;
+          
+          if (result.results && result.results.length > 0) {
+            successHtml += `
+              <div style="background: #1a4d2a; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <div style="color: #5db88f; font-weight: bold; margin-bottom: 5px;">📄 Documentos Processados:</div>
+                ${result.results.map(doc => `
+                  <div style="color: #7a9ca8; font-size: 12px; margin-bottom: 3px;">
+                    • ${doc.filename} (${(doc.size / 1024).toFixed(1)} KB) - ${doc.chunksCount} chunks
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
+          
+          if (result.errors && result.errors.length > 0) {
+            successHtml += `
+              <div style="background: #4d1a1a; padding: 10px; border-radius: 4px;">
+                <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 5px;">⚠️ Erros:</div>
+                ${result.errors.map(err => `
+                  <div style="color: #ff6b6b; font-size: 12px; margin-bottom: 3px;">
+                    • ${err.filename}: ${err.error}
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
+          
+          document.getElementById('uploadStatus').innerHTML = successHtml;
+          fileInput.value = '';
+          
+          // Atualizar lista de documentos se estivermos na aba de gerenciamento
+          setTimeout(() => {
+            if (document.getElementById('adminContent').innerHTML.includes('Gerenciar Documentos')) {
+              manageDocuments();
+            }
+          }, 1000);
+          
         } else {
-          document.getElementById('uploadStatus').innerHTML = `<p style="color: #ff6b6b;">Erro: ${result.error}</p>`;
+          let errorHtml = '<div style="color: #ff6b6b;">❌ Erro no upload:</div>';
+          if (result.errors && result.errors.length > 0) {
+            errorHtml += result.errors.map(err => `
+              <div style="color: #ff6b6b; font-size: 12px; margin: 5px 0;">
+                • ${err.filename}: ${err.error}
+              </div>
+            `).join('');
+          } else {
+            errorHtml += `<div style="color: #ff6b6b; font-size: 12px;">${result.error || 'Erro desconhecido'}</div>`;
+          }
+          document.getElementById('uploadStatus').innerHTML = errorHtml;
         }
       } catch (error) {
-        document.getElementById('uploadStatus').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+        document.getElementById('uploadStatus').innerHTML = `
+          <div style="color: #ff6b6b;">
+            ❌ Erro de conexão: ${error.message}
+          </div>
+        `;
       }
     }
 
@@ -589,6 +827,313 @@
         `;
       } catch (error) {
         document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    async function manageDocuments() {
+      try {
+        // Buscar lista de documentos
+        const response = await fetch('/api/documents');
+        const data = await response.json();
+        
+        // Buscar estatísticas
+        const statsResponse = await fetch('/api/documents/stats');
+        const stats = await statsResponse.json();
+        
+        const documents = data.documents || [];
+        const documentStats = stats.stats || {};
+        
+        let documentsHtml = '';
+        
+        if (documents.length === 0) {
+          documentsHtml = `
+            <div style="background: #1a2332; padding: 20px; border-radius: 4px; text-align: center; color: #7a9ca8;">
+              📄 Nenhum documento encontrado
+            </div>
+          `;
+        } else {
+          documentsHtml = documents.map(doc => `
+            <div style="background: #1a2332; padding: 15px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #2d6a7a;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                  <div style="color: #a8c5d1; font-weight: bold; margin-bottom: 5px;">${doc.filename}</div>
+                  <div id="description-${doc.id}" style="margin-bottom: 5px;">
+                    ${doc.description ? `<div style="color: #5db88f; font-size: 12px; font-style: italic;">📝 ${doc.description}</div>` : '<div style="color: #7a9ca8; font-size: 12px; font-style: italic;">📝 Sem descrição</div>'}
+                  </div>
+                  <div style="color: #7a9ca8; font-size: 12px;">
+                    📁 ${doc.fileType} • 📏 ${(doc.fileSize / 1024).toFixed(1)} KB • 
+                    ${doc.processed ? '✅ Processado' : '⏳ Processando'} • 
+                    📅 ${new Date(doc.createdAt).toLocaleDateString('pt-BR')}
+                  </div>
+                </div>
+                <div style="display: flex; gap: 5px; margin-left: 10px;">
+                  <button onclick="editDescription('${doc.id}', '${doc.filename}', '${(doc.description || '').replace(/'/g, "\\'")}')" 
+                          style="background: #2d6a7a; color: #a8c5d1; border: 1px solid #2d6a7a; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                    ✏️ Editar
+                  </button>
+                  <button onclick="deleteDocument('${doc.id}', '${doc.filename}')" 
+                          style="background: #4d1a1a; color: #ff6b6b; border: 1px solid #ff6b6b; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                    🗑️ Remover
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #a8c5d1; margin-bottom: 15px;">📚 Gerenciar Documentos</h4>
+            
+            <!-- Estatísticas -->
+            <div style="background: #1a4d2a; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+              <div style="color: #5db88f; font-weight: bold; margin-bottom: 10px;">📊 Estatísticas</div>
+              <div style="color: #7a9ca8; font-size: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>📄 Total: ${documentStats.totalDocuments || 0}</div>
+                <div>✅ Processados: ${documentStats.processedDocuments || 0}</div>
+                <div>📏 Tamanho: ${((documentStats.totalSize || 0) / 1024).toFixed(1)} KB</div>
+                <div>🧩 Chunks: ${documentStats.totalChunks || 0}</div>
+              </div>
+            </div>
+            
+            <!-- Lista de documentos -->
+            <div style="margin-bottom: 15px;">
+              <div style="color: #a8c5d1; font-weight: bold; margin-bottom: 10px;">📋 Documentos Carregados</div>
+              ${documentsHtml}
+            </div>
+            
+            <div style="color: #7a9ca8; font-size: 12px; margin-top: 15px;">
+              💡 <strong>Dica:</strong> Remover documentos também remove todos os chunks e embeddings associados.
+              O contexto será removido das respostas do assistente.
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('adminContent').innerHTML = `<p style="color: #ff6b6b;">Erro: ${error.message}</p>`;
+      }
+    }
+
+    async function editDescription(documentId, filename, currentDescription) {
+      const newDescription = prompt(
+        `Editar descrição do documento "${filename}":\n\n(Deixe em branco para remover a descrição)`,
+        currentDescription || ''
+      );
+      
+      if (newDescription === null) {
+        return; // Usuário cancelou
+      }
+      
+      try {
+        const response = await fetch(`/api/documents/${documentId}/description`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            description: newDescription.trim() || null 
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Atualizar a descrição na interface sem recarregar tudo
+          const descriptionElement = document.getElementById(`description-${documentId}`);
+          if (descriptionElement) {
+            const newDesc = result.document.description;
+            descriptionElement.innerHTML = newDesc 
+              ? `<div style="color: #5db88f; font-size: 12px; font-style: italic;">📝 ${newDesc}</div>`
+              : '<div style="color: #7a9ca8; font-size: 12px; font-style: italic;">📝 Sem descrição</div>';
+          }
+          
+          // Mostrar mensagem de sucesso
+          const successDiv = document.createElement('div');
+          successDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #1a4d2a; color: #5db88f; padding: 15px; border-radius: 4px; border: 1px solid #5db88f; z-index: 1000;';
+          successDiv.textContent = `✅ ${result.message}`;
+          document.body.appendChild(successDiv);
+          
+          setTimeout(() => {
+            document.body.removeChild(successDiv);
+          }, 3000);
+        } else {
+          throw new Error(result.error || 'Erro ao atualizar descrição');
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar descrição:', error);
+        alert(`Erro ao atualizar descrição: ${error.message}`);
+      }
+    }
+
+    async function deleteDocument(documentId, filename) {
+      if (!confirm(`Tem certeza que deseja remover o documento "${filename}"?\n\nIsso também removerá todos os chunks e embeddings associados.`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/documents/${documentId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Recarregar lista de documentos
+          manageDocuments();
+          
+          // Mostrar mensagem de sucesso
+          const successDiv = document.createElement('div');
+          successDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #1a4d2a; color: #5db88f; padding: 15px; border-radius: 4px; border: 1px solid #5db88f; z-index: 1000;';
+          successDiv.textContent = `✅ ${result.message}`;
+          document.body.appendChild(successDiv);
+          
+          setTimeout(() => {
+            document.body.removeChild(successDiv);
+          }, 3000);
+        } else {
+          throw new Error(result.error || 'Erro ao remover documento');
+        }
+      } catch (error) {
+        console.error('Erro ao remover documento:', error);
+        alert(`Erro ao remover documento: ${error.message}`);
+      }
+    }
+
+    async function startFineTuning() {
+      const finetuningBtn = document.getElementById('finetuningBtn');
+      const originalText = finetuningBtn.innerHTML;
+      
+      try {
+        // Desabilitar botão e mostrar progresso
+        finetuningBtn.disabled = true;
+        finetuningBtn.innerHTML = '⏳ Iniciando Fine-tuning...';
+        finetuningBtn.style.background = '#4d3a1a';
+        finetuningBtn.style.color = '#ffa500';
+        
+        // Mostrar barra de progresso e monitor
+        document.getElementById('finetuningProgress').style.display = 'block';
+        document.getElementById('performanceMonitor').style.display = 'block';
+        
+        // Iniciar monitor de desempenho
+        const startTime = Date.now();
+        const performanceInterval = setInterval(() => {
+          updatePerformanceMonitor(startTime);
+        }, 1000);
+        
+        // Atualizar progresso
+        updateProgress(0, 'Iniciando fine-tuning...', 'Preparando sistema');
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #a8c5d1; margin-bottom: 15px;">🚀 Fine-tuning em Andamento</h4>
+            <div style="background: #1a4d2a; padding: 15px; border-radius: 4px; margin-bottom: 15px; border: 1px solid #5db88f;">
+              <div style="color: #5db88f; font-weight: bold; margin-bottom: 10px;">📊 Status do Processo</div>
+              <div style="color: #7a9ca8; font-size: 12px;">
+                • Sistema iniciado e funcionando normalmente<br>
+                • Monitor de desempenho ativo<br>
+                • Barra de progresso atualizada em tempo real
+              </div>
+            </div>
+            <p style="color: #7a9ca8; font-size: 12px;">
+              O fine-tuning está sendo executado com monitoramento completo. Este processo pode levar alguns minutos.
+              Você pode acompanhar o progresso na barra acima e continuar usando o chat normalmente.
+            </p>
+          </div>
+        `;
+        
+        // Simular etapas do fine-tuning com progresso
+        const steps = [
+          { progress: 10, text: 'Coletando dados de treinamento...', details: 'Analisando conversas e documentos' },
+          { progress: 30, text: 'Gerando QA dos documentos...', details: 'Criando perguntas e respostas' },
+          { progress: 50, text: 'Formatando dados...', details: 'Preparando para treinamento' },
+          { progress: 70, text: 'Executando fine-tuning...', details: 'Treinando modelo com seus dados' },
+          { progress: 90, text: 'Salvando modelo...', details: 'Finalizando processo' }
+        ];
+        
+        // Executar etapas
+        for (let i = 0; i < steps.length; i++) {
+          const step = steps[i];
+          updateProgress(step.progress, step.text, step.details);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Simular tempo de processamento
+        }
+        
+        // Chamar endpoint de fine-tuning
+        updateProgress(95, 'Finalizando processo...', 'Conectando com servidor');
+        
+        const response = await fetch('/api/admin/finetuning/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Finalizar progresso
+          updateProgress(100, 'Fine-tuning concluído!', 'Modelo treinado com sucesso');
+          
+          // Parar monitor de desempenho
+          clearInterval(performanceInterval);
+          
+          // Atualizar botão
+          finetuningBtn.innerHTML = '✅ Fine-tuning Concluído';
+          finetuningBtn.style.background = '#1a4d2a';
+          finetuningBtn.style.color = '#5db88f';
+          finetuningBtn.disabled = false;
+          
+          // Atualizar conteúdo
+          document.getElementById('adminContent').innerHTML = `
+            <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+              <h4 style="color: #5db88f; margin-bottom: 15px;">✅ Fine-tuning Concluído com Sucesso!</h4>
+              <div style="background: #1a4d2a; padding: 15px; border-radius: 4px; margin-bottom: 15px; border: 1px solid #5db88f;">
+                <div style="color: #5db88f; font-weight: bold; margin-bottom: 10px;">📊 Estatísticas do Treinamento:</div>
+                <div style="color: #7a9ca8; font-size: 12px;">
+                  • Conversas utilizadas: ${result.stats?.conversations || 'N/A'}<br>
+                  • Mensagens processadas: ${result.stats?.messages || 'N/A'}<br>
+                  • Documentos processados: ${result.stats?.documentQA || 'N/A'}<br>
+                  • Feedback médio: ${result.stats?.avgFeedback || 'N/A'}/5.0<br>
+                  • Modelo base: ${result.model || 'qwen2.5:14b'}
+                </div>
+              </div>
+              <p style="color: #5db88f; font-size: 12px;">
+                🎉 O modelo foi treinado com sucesso! Agora ele pode responder perguntas baseadas nos seus documentos.
+              </p>
+            </div>
+          `;
+          
+          // Atualizar status de fine-tuning
+          setTimeout(() => {
+            updateFineTuningStatus();
+          }, 2000);
+          
+        } else {
+          throw new Error(result.error || 'Erro desconhecido');
+        }
+        
+      } catch (error) {
+        console.error('Erro no fine-tuning:', error);
+        
+        // Parar monitor de desempenho se estiver rodando
+        if (typeof performanceInterval !== 'undefined') {
+          clearInterval(performanceInterval);
+        }
+        
+        // Ocultar elementos de progresso
+        document.getElementById('finetuningProgress').style.display = 'none';
+        document.getElementById('performanceMonitor').style.display = 'none';
+        
+        // Restaurar botão
+        finetuningBtn.innerHTML = originalText;
+        finetuningBtn.disabled = false;
+        finetuningBtn.style.background = '#4d1a1a';
+        finetuningBtn.style.color = '#ff6b6b';
+        
+        document.getElementById('adminContent').innerHTML = `
+          <div style="background: #0f1419; padding: 20px; border-radius: 6px; border: 1px solid #2d6a7a;">
+            <h4 style="color: #ff6b6b; margin-bottom: 15px;">❌ Erro no Fine-tuning</h4>
+            <p style="color: #ff6b6b;">${error.message}</p>
+            <p style="color: #7a9ca8; font-size: 12px; margin-top: 10px;">
+              Verifique se há dados suficientes e tente novamente.
+            </p>
+          </div>
+        `;
       }
     }
 

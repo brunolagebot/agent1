@@ -58,6 +58,8 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
     let contextFromKB = '';
     let docsFound = 0;
     let factsFound = 0;
+    let foundDocs = [];
+    let foundFacts = [];
     
     if (useDocuments) {
       try {
@@ -66,9 +68,13 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
         if (onProgress) onProgress({ stage: 'search_documents', message: '🔍 Buscando em documentos' });
         const docs = await searchDocuments(userMessage, 3);
         docsFound = docs.length;
+        foundDocs = docs;
         if (docs.length > 0) {
-          contextFromDocs = '\n\n[Documentos]:\n' + 
-            docs.map((d, i) => `${i + 1}. ${d.content}`).join('\n\n');
+          contextFromDocs = '\n\n[Documentos Relevantes]:\n' + 
+            docs.map((d, i) => {
+              const source = `📄 ${d.filename}${d.description ? ` (${d.description})` : ''}`;
+              return `${i + 1}. ${d.content}\n   📍 Fonte: ${source}`;
+            }).join('\n\n');
         }
         tracker.endStage();
         
@@ -78,6 +84,7 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
         const { queryFacts } = require('../knowledge/query_facts');
         const facts = await queryFacts(userMessage, 3);
         factsFound = facts.length;
+        foundFacts = facts;
         if (facts.length > 0) {
           contextFromKB = '\n\n[Base de Conhecimento Permanente]:\n' + 
             facts.map((f, i) => `${i + 1}. ${f.title}: ${f.content}`).join('\n');
@@ -95,7 +102,13 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
     if (allContext) {
       messages.unshift({
         role: 'system',
-        content: `Você é um assistente objetivo e direto. Responda de forma concisa e precisa, sem textos desnecessários. Use o contexto fornecido quando relevante.${allContext}`,
+        content: `Você é um assistente objetivo e direto. Responda de forma concisa e precisa, sem textos desnecessários. 
+
+IMPORTANTE: Sempre que usar informações dos documentos fornecidos, cite EXATAMENTE qual documento contém a informação, incluindo o nome do arquivo. Use o formato: "📄 [nome do arquivo]".
+
+Se não encontrar a informação nos documentos fornecidos, diga claramente: "Não encontrei essa informação nos documentos disponíveis."
+
+Use o contexto fornecido quando relevante:${allContext}`,
       });
     } else {
       messages.unshift({
@@ -142,6 +155,17 @@ async function chat({ conversationId = null, userMessage, userRole = 'admin', us
       assistantMessage: savedAssistantMsg,
       messageId: savedAssistantMsg.id,
       telemetry,
+      sources: {
+        documents: docsFound > 0 ? foundDocs.map(d => ({
+          filename: d.filename,
+          description: d.description,
+          similarity: d.similarity
+        })) : [],
+        knowledgeBase: factsFound > 0 ? foundFacts.map(f => ({
+          title: f.title,
+          content: f.content
+        })) : []
+      }
     };
   } catch (error) {
     await tracker.finish({ error: error.message });

@@ -1,4 +1,4 @@
-# Roadmap - Agent1 SaaS
+# Roadmap - Agent1 Sistema Multiagentes
 
 ## ✅ v0.2.0 - Fundação (Concluído - 2025-10-19)
 - [x] Estrutura modular (domain/application/interfaces/infra)
@@ -247,6 +247,132 @@
   - `admin`: gestão de usuários, export completo
 - [ ] Associar `user_id` em conversas
 - [ ] Frontend: login/registro
+
+---
+
+## 🏗️ **NOVA ARQUITETURA: Sistema Multiagentes**
+
+### ✅ v0.5.2 - Agente Textual (ATUAL)
+**Status:** ✅ Implementado e Funcionando
+- [x] **Agente Textual** - Especialista em documentos PDF/TXT
+- [x] RAG com busca semântica
+- [x] Knowledge Base permanente
+- [x] Sistema de feedback e fine-tuning
+- [x] Citação de fontes nas respostas
+- [x] Interface administrativa
+
+### 🚧 v0.6.0 - Agente Numérico
+**Objetivo:** Especialista em cálculos e planilhas
+
+#### Backend
+- [ ] **Módulo `numeric`** - Agente especializado em dados numéricos
+  - [ ] `domain/numeric/spreadsheet.js` - entidade Planilha
+  - [ ] `domain/numeric/calculation.js` - entidade Cálculo
+  - [ ] `application/numeric/analyze_sheet.js` - análise de planilhas
+  - [ ] `application/numeric/calculate.js` - cálculos matemáticos
+  - [ ] `application/numeric/statistics.js` - análise estatística
+  - [ ] `infra/numeric/spreadsheet_parser.js` - parser CSV/XLSX
+  - [ ] `infra/numeric/postgres_numeric_repository.js`
+  - [ ] `interfaces/http/routes/numeric.js` - APIs REST
+
+#### APIs
+- [ ] `POST /api/numeric/analyze-sheet` - Análise de planilha
+- [ ] `POST /api/numeric/calculate` - Cálculos matemáticos
+- [ ] `POST /api/numeric/statistics` - Análise estatística
+- [ ] `POST /api/numeric/visualize` - Visualização de dados
+
+#### Frontend
+- [ ] Interface para upload de planilhas
+- [ ] Visualização de dados e gráficos
+- [ ] Calculadora integrada
+
+### 🔮 v0.7.0 - Agente Visual
+**Objetivo:** Especialista em análise de imagens
+
+#### Backend
+- [ ] **Módulo `visual`** - Agente especializado em imagens
+  - [ ] `domain/visual/image.js` - entidade Imagem
+  - [ ] `domain/visual/detected_object.js` - entidade Objeto Detectado
+  - [ ] `application/visual/detect_objects.js` - detecção de objetos
+  - [ ] `application/visual/describe_image.js` - descrição de imagens
+  - [ ] `infra/visual/yolo_detector.js` - YOLO v8/v9
+  - [ ] `infra/visual/llava_client.js` - LLaVA 1.6
+  - [ ] `infra/visual/postgres_visual_repository.js`
+
+#### APIs
+- [ ] `POST /api/visual/detect-objects` - Detecção de objetos
+- [ ] `POST /api/visual/describe` - Descrição de imagem
+- [ ] `POST /api/visual/classify` - Classificação visual
+- [ ] `POST /api/visual/analyze-scene` - Análise de cena
+
+#### Frontend
+- [ ] Interface para upload de imagens
+- [ ] Preview com bounding boxes
+- [ ] Galeria de objetos detectados
+
+### 🔮 v0.8.0 - Agente de Monitoramento
+**Objetivo:** Especialista em reconhecimento e monitoramento de pessoas
+
+#### Backend
+- [ ] **Módulo `monitoring`** - Agente especializado em pessoas
+  - [ ] `domain/monitoring/face.js` - entidade Face
+  - [ ] `domain/monitoring/person.js` - entidade Pessoa
+  - [ ] `domain/monitoring/event.js` - entidade Evento
+  - [ ] `application/monitoring/register_face.js` - registro de faces
+  - [ ] `application/monitoring/identify_person.js` - identificação
+  - [ ] `application/monitoring/monitor_realtime.js` - monitoramento
+  - [ ] `infra/monitoring/face_recognizer.js` - DeepFace/InsightFace
+  - [ ] `infra/monitoring/postgres_monitoring_repository.js`
+
+#### APIs
+- [ ] `POST /api/monitoring/register-face` - Registrar face
+- [ ] `POST /api/monitoring/identify-person` - Identificar pessoa
+- [ ] `POST /api/monitoring/search-faces` - Buscar faces
+- [ ] `GET /api/monitoring/events` - Eventos de monitoramento
+- [ ] `POST /api/monitoring/alerts` - Sistema de alertas
+
+#### Frontend
+- [ ] Dashboard de monitoramento
+- [ ] Timeline de eventos
+- [ ] Sistema de alertas
+- [ ] Galeria de pessoas conhecidas
+
+### 🔮 v0.9.0 - Orquestrador Inteligente
+**Objetivo:** Coordenação avançada entre agentes
+
+#### Backend
+- [ ] **Módulo `coordinator`** - Agente coordenador
+  - [ ] `domain/coordinator/query_analyzer.js` - análise de consultas
+  - [ ] `domain/coordinator/agent_router.js` - roteamento de agentes
+  - [ ] `application/coordinator/route_query.js` - roteamento inteligente
+  - [ ] `application/coordinator/aggregate_results.js` - agregação
+  - [ ] `infra/coordinator/agent_communication.js` - comunicação
+
+#### Funcionalidades
+- [ ] Análise automática do tipo de consulta
+- [ ] Roteamento inteligente para agente(s) adequado(s)
+- [ ] Coordenação entre múltiplos agentes
+- [ ] Agregação de resultados
+- [ ] Cache distribuído entre agentes
+- [ ] Comunicação assíncrona
+
+#### Frontend
+- [ ] Interface unificada para todos os agentes
+- [ ] Indicadores de qual agente está processando
+- [ ] Histórico de consultas multiagentes
+- [ ] Dashboard de performance por agente
+
+---
+
+## 🎯 **Benefícios da Arquitetura Multiagentes**
+
+1. **Especialização:** Cada agente otimizado para sua área específica
+2. **Escalabilidade:** Agentes podem ser escalados independentemente
+3. **Manutenibilidade:** Código modular e separado por responsabilidade
+4. **Performance:** Processamento paralelo e otimizado
+5. **Flexibilidade:** Fácil adição de novos agentes especializados
+6. **Confiabilidade:** Falha de um agente não afeta os outros
+7. **Evolução Gradual:** Implementação incremental sem quebrar funcionalidades existentes
 
 ### v0.7.0+ - RAG, Testes, Produção
 - [ ] RAG com seus arquivos (quando necessário)

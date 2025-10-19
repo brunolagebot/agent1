@@ -1,9 +1,16 @@
-# Visão Computacional - Roadmap
+# Visão Computacional - Agente Visual
 
 ## Objetivo
-Adicionar capacidade de análise de imagens com detecção de objetos, pessoas e reconhecimento facial para monitoramento.
+Implementar o **Agente Visual** como parte do sistema multiagentes, especializado em análise de imagens com detecção de objetos, pessoas e reconhecimento facial.
 
-## Escopo Futuro (v0.6.0+)
+## Arquitetura Multiagentes
+O Agente Visual será um dos 4 agentes especializados:
+- ✅ **Agente Textual** (v0.5.2) - Documentos PDF/TXT
+- 🚧 **Agente Numérico** (v0.6.0) - Planilhas e cálculos
+- 🔮 **Agente Visual** (v0.7.0) - Análise de imagens
+- 🔮 **Agente de Monitoramento** (v0.8.0) - Reconhecimento facial
+
+## Escopo do Agente Visual (v0.7.0)
 
 ### 1. Modelo de Visão
 **Opções para Apple Silicon (M4):**

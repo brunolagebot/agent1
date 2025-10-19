@@ -7,6 +7,7 @@ const { PostgresConversationsRepository } = require('../../../infra/conversation
 const { PostgresDocumentsRepository } = require('../../../infra/documents/postgres_documents_repository');
 const { PostgresKnowledgeRepository } = require('../../../infra/knowledge/postgres_knowledge_repository');
 const { OllamaClient } = require('../../../infra/llm/ollama_client');
+const { executeFineTuning } = require('../../../application/llm/finetuning');
 
 const conversationsRepo = new PostgresConversationsRepository();
 const documentsRepo = new PostgresDocumentsRepository();
@@ -121,18 +122,29 @@ async function handleFineTuningStatusRoute(req, res) {
     
     const avgFeedback = feedbackCount > 0 ? (totalFeedbackScore / feedbackCount).toFixed(2) : '0.00';
     
-    // Critérios para fine-tuning
+    // Contar documentos processados
+    const processedDocuments = documents.filter(doc => doc.processed).length;
+    
+    // Critérios para fine-tuning (mais flexíveis com documentos)
     const criteria = {
-      conversations: { current: conversations.length, required: 50 },
-      messages: { current: totalMessages, required: 200 },
-      feedback: { current: feedbackCount, required: 20 },
-      avgFeedback: { current: parseFloat(avgFeedback), required: 3.5 }
+      conversations: { current: conversations.length, required: 10 },
+      messages: { current: totalMessages, required: 50 },
+      feedback: { current: feedbackCount, required: 5 },
+      documents: { current: processedDocuments, required: 1 },
+      avgFeedback: { current: parseFloat(avgFeedback), required: 3.0 }
     };
     
-    const isReady = criteria.conversations.current >= criteria.conversations.required &&
-                   criteria.messages.current >= criteria.messages.required &&
-                   criteria.feedback.current >= criteria.feedback.required &&
-                   criteria.avgFeedback.current >= criteria.avgFeedback.required;
+    // Fine-tuning disponível se:
+    // 1. Tem conversas suficientes E feedback suficiente, OU
+    // 2. Tem documentos processados (mesmo sem conversas)
+    const hasConversationData = criteria.conversations.current >= criteria.conversations.required &&
+                               criteria.messages.current >= criteria.messages.required &&
+                               criteria.feedback.current >= criteria.feedback.required &&
+                               criteria.avgFeedback.current >= criteria.avgFeedback.required;
+    
+    const hasDocumentData = criteria.documents.current >= criteria.documents.required;
+    
+    const isReady = hasConversationData || hasDocumentData;
     
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
@@ -142,10 +154,15 @@ async function handleFineTuningStatusRoute(req, res) {
         conversations: conversations.length,
         messages: totalMessages,
         documents: documents.length,
+        processedDocuments: processedDocuments,
         facts: facts.length,
         feedback: {
           count: feedbackCount,
           average: avgFeedback
+        },
+        dataSources: {
+          hasConversationData,
+          hasDocumentData
         }
       }
     }));
@@ -154,6 +171,44 @@ async function handleFineTuningStatusRoute(req, res) {
     res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({ error: error.message }));
   }
+}
+
+/**
+ * POST /api/admin/finetuning/start
+ * Inicia processo de fine-tuning
+ */
+async function handleStartFineTuningRoute(req, res) {
+  let body = '';
+  
+  req.on('data', (chunk) => { body += chunk; });
+  
+  req.on('end', async () => {
+    try {
+      const options = JSON.parse(body || '{}');
+      
+      // Executar fine-tuning usando o serviço
+      const result = await executeFineTuning(options);
+      
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({
+        success: true,
+        message: 'Fine-tuning executado com sucesso',
+        stats: result.stats,
+        model: result.model.name,
+        baseModel: result.model.baseModel,
+        performance: result.model.performance,
+        note: result.note
+      }));
+      
+    } catch (error) {
+      console.error('[admin/finetuning] Error:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ 
+        success: false,
+        error: error.message 
+      }));
+    }
+  });
 }
 
 /**
@@ -177,6 +232,10 @@ function handleAdminRoutes(url, req, res) {
   
   if (url === '/api/admin/finetuning-status' && req.method === 'GET') {
     return handleFineTuningStatusRoute(req, res);
+  }
+  
+  if (url === '/api/admin/finetuning/start' && req.method === 'POST') {
+    return handleStartFineTuningRoute(req, res);
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });

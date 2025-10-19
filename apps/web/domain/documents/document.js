@@ -4,7 +4,7 @@
  */
 
 class Document {
-  constructor({ id, userId, filename, fileType, fileSize, contentText, metadata = {}, createdAt, processed = false }) {
+  constructor({ id, userId, filename, fileType, fileSize, contentText, metadata = {}, createdAt, processed = false, description = null }) {
     this.id = id;
     this.userId = userId;
     this.filename = filename;
@@ -14,9 +14,10 @@ class Document {
     this.metadata = metadata;
     this.createdAt = createdAt || new Date();
     this.processed = processed;
+    this.description = description;
   }
 
-  static create({ userId, filename, fileType, fileSize, contentText, metadata = {} }) {
+  static create({ userId, filename, fileType, fileSize, contentText, metadata = {}, description = null }) {
     return new Document({
       id: null,
       userId,
@@ -26,6 +27,7 @@ class Document {
       contentText,
       metadata,
       processed: false,
+      description,
     });
   }
 
@@ -40,6 +42,7 @@ class Document {
       metadata: data.metadata || {},
       createdAt: new Date(data.created_at),
       processed: data.processed,
+      description: data.description,
     });
   }
 
@@ -54,6 +57,7 @@ class Document {
       metadata: this.metadata,
       created_at: this.createdAt,
       processed: this.processed,
+      description: this.description,
     };
   }
 }

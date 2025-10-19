@@ -2,7 +2,8 @@
 
 **Data:** 2025-10-19  
 **Commit:** `v0.5.2`  
-**Status:** ✅ Totalmente funcional com sistema de feedback
+**Status:** ✅ Totalmente funcional com sistema de feedback  
+**Arquitetura:** 🏗️ Sistema Multiagentes (Agente Textual implementado)
 
 ---
 
@@ -29,7 +30,7 @@ curl http://web.localhost/api/system/stats
 # ✅ Retorna métricas completas
 ```
 
-### Módulos Ativos:
+### 🤖 **Agente Textual (IMPLEMENTADO)**
 - ✅ **LLM:** Qwen2.5:14b (9GB, 16s-40s por resposta) - **OTIMIZADO PARA OBJETIVIDADE**
 - ✅ **RAG:** PDF/TXT upload + busca semântica
 - ✅ **Knowledge Base:** Fatos permanentes (48% carcaça bovina)
@@ -38,6 +39,13 @@ curl http://web.localhost/api/system/stats
 - ✅ **Performance:** Métricas no PostgreSQL
 - ✅ **Feedback:** Sistema completo com botões visuais (😞-😍)
 - ✅ **Admin:** Aba de administração com monitor de fine-tuning
+- ✅ **Citação de Fontes:** Sistema completo mostrando documentos consultados
+
+### 🔮 **Agentes Planejados (NÃO IMPLEMENTADOS)**
+- ❌ **Agente Numérico:** Cálculos e planilhas (v0.6.0)
+- ❌ **Agente Visual:** Análise de imagens (v0.7.0)
+- ❌ **Agente de Monitoramento:** Reconhecimento facial (v0.8.0)
+- ❌ **Orquestrador:** Coordenação entre agentes (v0.9.0)
 
 ---
 

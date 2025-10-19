@@ -1,7 +1,19 @@
 # Changelog
 
 ## [0.5.2] - 2025-10-19
-### Adicionado
+### 🏗️ **ARQUITETURA MULTIAGENTES**
+- **Nova Visão Arquitetural**
+  - Sistema evoluiu para arquitetura de multiagentes especializados
+  - Cada agente possui expertise específica e responsabilidades bem definidas
+  - Coordenação inteligente entre agentes para respostas precisas
+  - Documentação completa em `ARQUITETURA_MULTIAGENTES.md`
+
+### 🤖 **Agente Textual (IMPLEMENTADO)**
+- **Sistema de Citação de Fontes**
+  - Mostra exatamente quais documentos foram consultados
+  - Exibe percentual de relevância de cada fonte
+  - Inclui descrição dos documentos quando disponível
+  - Formato padronizado: "📄 [nome do arquivo]"
 - **Sistema de Feedback Completo**
   - Botões de avaliação (😞-😍) abaixo de cada resposta do assistente
   - Avaliação de 1-5 pontos com feedback visual
@@ -19,6 +31,12 @@
   - `/api/admin/finetuning-status` - Status detalhado para fine-tuning
   - `/api/admin/export` - Exportação de dados de treino
   - `/api/messages/feedback` - Sistema de feedback de mensagens
+
+### 🔮 **Agentes Planejados**
+- **Agente Numérico** (v0.6.0) - Especialista em cálculos e planilhas
+- **Agente Visual** (v0.7.0) - Especialista em análise de imagens
+- **Agente de Monitoramento** (v0.8.0) - Especialista em reconhecimento facial
+- **Orquestrador** (v0.9.0) - Coordenação inteligente entre agentes
 
 ### Modificado
 - **LLM Otimizado para Respostas Objetivas**

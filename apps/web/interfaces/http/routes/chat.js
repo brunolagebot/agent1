@@ -57,6 +57,7 @@ async function handleChatRoute(req, res) {
         messageId: result.messageId,
         telemetry: result.telemetry || null,
         progressLog: progressUpdates,
+        sources: result.sources || { documents: [], knowledgeBase: [] },
       }, null, 2));
     } catch (error) {
       logger.error('Chat failed', { body: body.slice(0, 200) }, error);

@@ -8,15 +8,19 @@ const { Chunk } = require('../../domain/documents/chunk');
 const { PostgresDocumentsRepository } = require('../../infra/documents/postgres_documents_repository');
 const { parsePDF, chunkText } = require('../../infra/documents/pdf_parser');
 const { parseText } = require('../../infra/documents/text_parser');
+const { parseSpreadsheet } = require('../../infra/documents/spreadsheet_parser');
 const { generateEmbeddings } = require('../../infra/llm/embeddings_client');
 
 const repo = new PostgresDocumentsRepository();
 
-async function ingestDocument({ userId, filename, fileType, buffer }) {
+async function ingestDocument({ userId, filename, fileType, buffer, description = null }) {
   // 1. Parse baseado no tipo
   let parsed;
   if (fileType === 'application/pdf' || filename.endsWith('.pdf')) {
     parsed = await parsePDF(buffer);
+  } else if (fileType.includes('csv') || fileType.includes('excel') || 
+             filename.endsWith('.csv') || filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
+    parsed = await parseSpreadsheet(buffer, filename, fileType);
   } else {
     parsed = parseText(buffer);
   }
@@ -29,6 +33,7 @@ async function ingestDocument({ userId, filename, fileType, buffer }) {
     fileSize: buffer.length,
     contentText: parsed.text,
     metadata: parsed.metadata || {},
+    description,
   });
   const savedDoc = await repo.createDocument(doc);
 
