@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.5.1] - 2025-10-19
+### Adicionado
+- **Telemetria Detalhada em Tempo Real**
+  - PerformanceTracker: rastreia 8 etapas do processamento
+  - Cronometragem automática de cada stage
+  - Tabela `performance_metrics`: armazena duração de operações
+  - View `performance_analysis`: médias, p50, p95, min, max
+  - Dados de performance acessíveis ao próprio modelo
+  - Telemetry box: exibe etapas em tempo real na interface
+  - Logs de performance para análise e otimização
+- **Interface Escura Refinada**
+  - Paleta: azul petróleo (#1a4d5e), verde escuro (#2d6a7a), cinza espacial (#0f2027)
+  - Design minimalista com bordas sutis
+  - Gradientes escuros e sombras profundas
+  - Scrollbar customizada com cores escuras
+  - Feedback visual aprimorado
+
+### Modificado
+- Modo professor permanente: seletor admin/usuário removido
+- Todas conversas agora são automaticamente admin (treinamento)
+- Timeout aumentado para 90 segundos
+- Interface: histórico lateral + telemetria + cores escuras
+- Qwen2.5:14b como modelo padrão (mais robusto)
+- Colima: 16GB RAM + 6 CPUs
+
+### Adicionado (Documentação)
+- `ROLLBACK.md`: guia completo para voltar versões anteriores
+- `UPGRADE_MODELO.md`: como usar modelos maiores
+- `VISAO_COMPUTACIONAL.md`: roadmap análise de imagens + reconhecimento facial
+
 ## [0.4.0] - 2025-10-19
 ### Adicionado
 - **Sistema de Logging Estruturado**
