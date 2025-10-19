@@ -10,7 +10,18 @@ const { handleLogsRoutes } = require('./routes/logs.js');
 const { handleMessagesRoutes } = require('./routes/messages.js');
 const { handleKnowledgeRoutes } = require('./routes/knowledge.js');
 const { handleSystemRoutes } = require('./routes/system.js');
+const { 
+  handleListDirectoriesRoute,
+  handleAddDirectoryRoute,
+  handleUpdateDirectoryRoute,
+  handleDeleteDirectoryRoute,
+  handleScanDirectoryRoute,
+  handleListFilesRoute,
+  handleRunMonitoringRoute,
+  handleStatusRoute
+} = require('./routes/monitoring.js');
 const { createLogger } = require('../../infra/logging/logger');
+const { startGlobalScheduler } = require('../../application/monitoring/scheduler');
 
 const logger = createLogger('server');
 const PORT = Number(process.env.PORT || 3000);
@@ -87,6 +98,39 @@ function requestListener(req, res) {
     return handleSystemRoutes(url, req, res);
   }
 
+  // Rotas de Monitoramento
+  if (url === '/api/monitoring/directories' && req.method === 'GET') {
+    return handleListDirectoriesRoute(req, res);
+  }
+  
+  if (url === '/api/monitoring/directories' && req.method === 'POST') {
+    return handleAddDirectoryRoute(req, res);
+  }
+  
+  if (url.startsWith('/api/monitoring/directories/') && req.method === 'PUT') {
+    return handleUpdateDirectoryRoute(req, res);
+  }
+  
+  if (url.startsWith('/api/monitoring/directories/') && req.method === 'DELETE') {
+    return handleDeleteDirectoryRoute(req, res);
+  }
+  
+  if (url.includes('/api/monitoring/directories/') && url.endsWith('/scan') && req.method === 'POST') {
+    return handleScanDirectoryRoute(req, res);
+  }
+  
+  if (url.startsWith('/api/monitoring/files/') && req.method === 'GET') {
+    return handleListFilesRoute(req, res);
+  }
+  
+  if (url === '/api/monitoring/run' && req.method === 'POST') {
+    return handleRunMonitoringRoute(req, res);
+  }
+  
+  if (url === '/api/monitoring/status' && req.method === 'GET') {
+    return handleStatusRoute(req, res);
+  }
+
   logger.warn('Route not found', { url, method: req.method });
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify({ error: 'Not Found' }));
@@ -96,6 +140,14 @@ function startServer() {
   const server = http.createServer(requestListener);
   server.listen(PORT, () => {
     logger.info('Server started', { port: PORT, env: process.env.NODE_ENV || 'development' });
+    
+    // Iniciar scheduler de monitoramento
+    try {
+      startGlobalScheduler();
+      logger.info('Scheduler de monitoramento iniciado');
+    } catch (error) {
+      logger.error('Erro ao iniciar scheduler de monitoramento', {}, error);
+    }
   });
   return server;
 }
