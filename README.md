@@ -1,17 +1,37 @@
-# Projeto SaaS Modular
-Leia `RULES.md`.
+# Agent1 v0.5.1 - Chat Inteligente com LLM Local
+
+Sistema modular de chat com LLM local (Qwen2.5:14b), RAG, Knowledge Base permanente e treinamento automático.
+
+**🚀 Status:** Produção-ready | **📊 Modo:** Treinamento contínuo | **🤖 Modelo:** Qwen2.5:14b
+
+Leia `RULES.md` para regras de arquitetura.
+
+## ✨ Features
+
+- 🤖 **LLM Local** - Qwen2.5:14b (9GB, PT-BR excelente)
+- 📚 **RAG** - Upload PDF/TXT com busca semântica (pgvector)
+- 💾 **Knowledge Base** - Fatos permanentes (eternos, sobrevivem troca de modelo)
+- 💬 **Histórico** - ChatGPT-style com sidebar lateral
+- ⏱️ **Telemetria** - 8 etapas rastreadas em tempo real
+- ⭐ **Feedback** - 5 níveis (😞-😍) para melhoria contínua
+- 🎓 **Treinamento** - Todas conversas aprovadas para fine-tuning
+- 📊 **Analytics** - Logs estruturados, métricas de performance
+- ⚙️ **Painel Admin** - Estatísticas, export, análises (na interface)
+- 🎨 **Interface Escura** - Minimalista, profissional, proporções ChatGPT
 
 ## Requisitos
 
-- Docker instalado
+- **Docker** instalado (Colima ou Docker Desktop)
   - macOS: execute `scripts/bootstrap_macos.sh`
   - Download: [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- **RAM**: Mínimo 16GB para Qwen2.5:14b (8GB para modelos menores)
+- **Disk**: ~15GB (modelos + dados)
 
 Verifique a instalação:
 
 ```bash
 docker --version
-docker info
+docker info | grep Memory  # Verificar RAM disponível
 ```
 
 ## Desenvolvimento (Docker + Traefik)

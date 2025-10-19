@@ -399,6 +399,76 @@
       color: #e06c75;
       border: 1px solid rgba(224, 108, 117, 0.3);
     }
+    
+    .tab-btn {
+      width: calc(50% - 4px);
+      padding: 8px;
+      background: transparent;
+      color: #7a9ca8;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      margin-right: 4px;
+    }
+    
+    .tab-btn:hover {
+      background: rgba(45, 70, 85, 0.3);
+    }
+    
+    .tab-btn.active {
+      background: #1a4d5e;
+      color: #e3e8ec;
+      border-color: rgba(100, 150, 170, 0.25);
+    }
+    
+    .admin-panel {
+      padding: 12px;
+    }
+    
+    .admin-section {
+      margin-bottom: 20px;
+    }
+    
+    .admin-section h4 {
+      color: #a8c5d1;
+      font-size: 13px;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    
+    .admin-btn {
+      width: 100%;
+      padding: 10px;
+      background: rgba(30, 50, 60, 0.5);
+      color: #c5dae0;
+      border: 1px solid rgba(100, 150, 170, 0.25);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      text-align: left;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    
+    .admin-btn:hover {
+      background: rgba(45, 70, 85, 0.5);
+      border-color: rgba(100, 150, 170, 0.4);
+    }
+    
+    .stats-box {
+      background: rgba(15, 25, 35, 0.6);
+      border: 1px solid rgba(100, 150, 170, 0.15);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 12px;
+      color: #7a9ca8;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -412,7 +482,14 @@
       <div class="sidebar-header">
         <button class="new-chat-btn" onclick="startNewChat()">➕ Nova Conversa</button>
       </div>
+      
+      <div style="padding: 12px; border-bottom: 1px solid rgba(100, 150, 170, 0.15);">
+        <button class="tab-btn active" onclick="switchTab('chat')" id="chatTab">💬 Chat</button>
+        <button class="tab-btn" onclick="switchTab('admin')" id="adminTab">⚙️ Admin</button>
+      </div>
+      
       <div class="conversations-list" id="conversationsList"></div>
+      <div class="admin-panel" id="adminPanel" style="display: none; padding: 12px;"></div>
     </div>
 
     <div class="main-content">
@@ -706,6 +783,159 @@
       status.textContent = msg;
       status.className = 'status ' + type;
       setTimeout(() => { status.textContent = ''; status.className = ''; }, 5000);
+    }
+
+    function switchTab(tab) {
+      document.getElementById('chatTab').classList.remove('active');
+      document.getElementById('adminTab').classList.remove('active');
+      
+      if (tab === 'chat') {
+        document.getElementById('chatTab').classList.add('active');
+        document.getElementById('conversationsList').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+      } else {
+        document.getElementById('adminTab').classList.add('active');
+        document.getElementById('conversationsList').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadAdminPanel();
+      }
+    }
+
+    async function loadAdminPanel() {
+      const panel = document.getElementById('adminPanel');
+      
+      panel.innerHTML = \`
+        <div class="admin-section">
+          <h4>📊 Estatísticas</h4>
+          <button class="admin-btn" onclick="showStats()">Ver Estatísticas do Sistema</button>
+          <div id="statsDisplay"></div>
+        </div>
+
+        <div class="admin-section">
+          <h4>🔍 Análise</h4>
+          <button class="admin-btn" onclick="analyzePerformance()">Análise de Performance</button>
+          <button class="admin-btn" onclick="analyzeLogs()">Análise de Logs</button>
+          <button class="admin-btn" onclick="showFeedbackStats()">Estatísticas de Feedback</button>
+        </div>
+
+        <div class="admin-section">
+          <h4>📥 Exportar</h4>
+          <button class="admin-btn" onclick="exportTraining()">Exportar Conversas (Fine-tuning)</button>
+          <button class="admin-btn" onclick="exportKnowledge()">Exportar Knowledge Base</button>
+        </div>
+
+        <div class="admin-section">
+          <h4>🤖 Modelos</h4>
+          <button class="admin-btn" onclick="listModels()">Listar Modelos Ollama</button>
+        </div>
+
+        <div class="admin-section">
+          <h4>📖 Versão</h4>
+          <button class="admin-btn" onclick="showVersion()">Ver Versão e Git Info</button>
+        </div>
+      \`;
+    }
+
+    async function showStats() {
+      try {
+        const res = await fetch('/api/system/stats');
+        const data = await res.json();
+        
+        document.getElementById('statsDisplay').innerHTML = \`
+          <div class="stats-box">
+            <div>Conversas: \${data.conversations}</div>
+            <div>Mensagens: \${data.messages}</div>
+            <div>Documentos: \${data.documents}</div>
+            <div>Fatos (KB): \${data.facts}</div>
+            <div>Feedback médio: \${data.feedback.average || 'N/A'} (\${data.feedback.count} avaliações)</div>
+          </div>
+        \`;
+      } catch (error) {
+        alert('Erro ao buscar estatísticas: ' + error.message);
+      }
+    }
+
+    async function analyzePerformance() {
+      try {
+        const res = await query('SELECT * FROM performance_analysis LIMIT 10');
+        const text = await res.text();
+        showResultBox('Performance', text);
+      } catch (error) {
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    async function analyzeLogs() {
+      try {
+        const res = await fetch('/api/logs/analyze');
+        const data = await res.json();
+        showResultBox('Logs', JSON.stringify(data, null, 2));
+      } catch (error) {
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    async function showFeedbackStats() {
+      try {
+        const res = await fetch('/api/messages/feedback-stats');
+        const data = await res.json();
+        showResultBox('Feedback', JSON.stringify(data, null, 2));
+      } catch (error) {
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    async function exportTraining() {
+      window.open('/api/admin/export', '_blank');
+    }
+
+    async function exportKnowledge() {
+      try {
+        const res = await fetch('/api/knowledge/list');
+        const data = await res.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = \`knowledge-base-\${new Date().toISOString().split('T')[0]}.json\`;
+        a.click();
+      } catch (error) {
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    async function listModels() {
+      try {
+        const res = await fetch('/api/system/models');
+        const text = await res.text();
+        showResultBox('Modelos Ollama', text);
+      } catch (error) {
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    async function showVersion() {
+      try {
+        const res = await fetch('/api/system/version');
+        const data = await res.json();
+        showResultBox('Versão', \`Agent1 v\${data.version}\\nGit: \${data.gitTag}\\nCommit: \${data.gitCommit}\`);
+      } catch (error) {
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    function showResultBox(title, content) {
+      const existing = document.getElementById('resultBox');
+      if (existing) existing.remove();
+      
+      const box = document.createElement('div');
+      box.id = 'resultBox';
+      box.className = 'stats-box';
+      box.style.whiteSpace = 'pre-wrap';
+      box.textContent = content;
+      
+      const section = document.querySelector('.admin-section');
+      section.appendChild(box);
     }
   </script>
 </body>
