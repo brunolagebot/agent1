@@ -18,7 +18,7 @@ async function handleChatRoute(req, res) {
   
   req.on('end', async () => {
     try {
-      const { conversationId, message, userRole = 'user' } = JSON.parse(body || '{}');
+      const { conversationId, message, userRole = 'admin' } = JSON.parse(body || '{}');
       
       logger.info('Chat request received', { conversationId, userRole, messageLength: message?.length });
       
@@ -29,13 +29,25 @@ async function handleChatRoute(req, res) {
         return;
       }
 
+      // Callback de progresso (para logging detalhado)
+      const progressUpdates = [];
+      const onProgress = (update) => {
+        const timestamp = new Date().toISOString();
+        progressUpdates.push({ ...update, timestamp });
+        logger.debug('Progress update', { stage: update.stage, message: update.message });
+      };
+
       const result = await chat({
         conversationId: conversationId || null,
         userMessage: message,
         userRole,
+        onProgress,
       });
 
-      logger.info('Chat response generated', { conversationId: result.conversationId });
+      logger.info('Chat response generated', { 
+        conversationId: result.conversationId,
+        totalTime: result.telemetry?.totalDuration + 'ms'
+      });
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({
@@ -43,6 +55,7 @@ async function handleChatRoute(req, res) {
         userMessage: result.userMessage.content,
         assistantMessage: result.assistantMessage.content,
         telemetry: result.telemetry || null,
+        progressLog: progressUpdates,
       }, null, 2));
     } catch (error) {
       logger.error('Chat failed', { body: body.slice(0, 200) }, error);

@@ -20,6 +20,26 @@
     button:hover { background: #3d8a9a; }
     input, textarea { width: 100%; padding: 10px; background: #0f1419; color: white; border: 1px solid #2d6a7a; border-radius: 6px; }
     #messages { height: 400px; overflow-y: auto; margin: 20px 0; padding: 10px; background: #0f1419; border-radius: 6px; }
+    #telemetry { 
+      background: rgba(26, 35, 50, 0.8); 
+      border: 1px solid #2d6a7a; 
+      border-radius: 6px; 
+      padding: 12px; 
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      display: none;
+    }
+    #telemetry.active { display: block; }
+    .telem-stage { 
+      padding: 4px 0; 
+      display: flex; 
+      justify-content: space-between;
+      color: #7a9ca8;
+    }
+    .telem-stage.done { color: #5db88f; }
+    .telem-stage.current { color: #3d8a9a; font-weight: bold; }
+    .telem-time { color: #a8c5d1; }
     .msg { padding: 10px; margin: 5px 0; border-radius: 6px; }
     .user { background: #2d6a7a; text-align: right; }
     .assistant { background: #1a4d5e; }
@@ -41,7 +61,11 @@
     </div>
 
     <div class="main">
-      <h3>💬 Chat</h3>
+      <h3>💬 Chat - Modo Treinamento</h3>
+      <div id="telemetry">
+        <div style="color: #a8c5d1; font-weight: bold; margin-bottom: 8px;">⏱️ Telemetria em Tempo Real</div>
+        <div id="telemStages"></div>
+      </div>
       <div id="messages"></div>
       <div id="status" style="margin: 10px 0; color: #7a9ca8; font-size: 13px;"></div>
       <textarea id="input" placeholder="Digite sua mensagem..." rows="3"></textarea>
@@ -52,6 +76,47 @@
   <script>
     let convId = null;
     let convs = [];
+    
+    const stageLabels = {
+      'create_conversation': '1. Criar/carregar conversa',
+      'save_user_message': '2. Salvar mensagem usuário',
+      'load_history': '3. Carregar histórico',
+      'search_documents': '4. Buscar em documentos',
+      'search_knowledge_base': '5. Consultar Knowledge Base',
+      'prepare_context': '6. Preparar contexto',
+      'llm_generation': '7. Gerar resposta (LLM)',
+      'save_assistant_message': '8. Salvar resposta',
+    };
+
+    function showTelemetry() {
+      const box = document.getElementById('telemetry');
+      const stages = document.getElementById('telemStages');
+      box.classList.add('active');
+      
+      stages.innerHTML = Object.entries(stageLabels).map(([key, label]) =>
+        '<div class="telem-stage" id="stage-' + key + '">' +
+          '<span>' + label + '</span>' +
+          '<span class="telem-time">⏳</span>' +
+        '</div>'
+      ).join('');
+    }
+
+    function hideTelemetry() {
+      document.getElementById('telemetry').classList.remove('active');
+    }
+
+    function updateStage(stage, status, duration) {
+      const el = document.getElementById('stage-' + stage);
+      if (!el) return;
+      
+      if (status === 'current') {
+        el.className = 'telem-stage current';
+        el.querySelector('.telem-time').textContent = '⏳ processando...';
+      } else if (status === 'done') {
+        el.className = 'telem-stage done';
+        el.querySelector('.telem-time').textContent = '✓ ' + duration + 'ms';
+      }
+    }
 
     async function loadConvs() {
       try {
@@ -115,25 +180,66 @@
 
       addMsg('user', msg);
       input.value = '';
-      document.getElementById('status').textContent = '🤖 Processando...';
+      
+      // Mostrar telemetria
+      showTelemetry();
+      document.getElementById('status').textContent = '🚀 Iniciando processamento...';
+
+      // Simular progresso das etapas (estimativa visual)
+      const stages = Object.keys(stageLabels);
+      let currentIdx = 0;
+      
+      const progressInterval = setInterval(() => {
+        if (currentIdx < stages.length) {
+          updateStage(stages[currentIdx], 'current', 0);
+          if (currentIdx > 0) {
+            updateStage(stages[currentIdx - 1], 'done', '~');
+          }
+          
+          // Atualizar status
+          document.getElementById('status').textContent = stageLabels[stages[currentIdx]];
+          currentIdx++;
+        }
+      }, 3000); // A cada 3s muda de etapa (estimativa)
 
       try {
+        const start = Date.now();
+        
         const r = await fetch('/api/chat', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({conversationId: convId, message: msg})
         });
 
+        clearInterval(progressInterval);
+        const totalTime = Date.now() - start;
+
         const d = await r.json();
         if (d.error) throw new Error(d.error);
 
         convId = d.conversationId;
         addMsg('assistant', d.assistantMessage);
-        document.getElementById('status').textContent = '✅ Pronto!';
+        
+        // Atualizar telemetria com dados reais
+        if (d.telemetry && d.telemetry.stages) {
+          Object.entries(d.telemetry.stages).forEach(([stageName, data]) => {
+            updateStage(stageName, 'done', data.duration);
+          });
+        } else {
+          // Marcar todas como concluídas
+          stages.forEach(s => updateStage(s, 'done', '?'));
+        }
+        
+        document.getElementById('status').textContent = '✅ Pronto! (' + (totalTime / 1000).toFixed(1) + 's total)';
         loadConvs();
         
-        setTimeout(() => document.getElementById('status').textContent = '', 3000);
+        setTimeout(() => {
+          document.getElementById('status').textContent = '';
+          hideTelemetry();
+        }, 5000);
       } catch (e) {
+        clearInterval(progressInterval);
+        hideTelemetry();
         document.getElementById('status').textContent = '❌ Erro: ' + e.message;
         console.error(e);
       }

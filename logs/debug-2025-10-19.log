@@ -59,3 +59,6 @@
 {"timestamp":"2025-10-19T19:20:42.737Z","level":"debug","message":"Stage started: chat → prepare_context","context":{"module":"telemetry"},"error":null}
 {"timestamp":"2025-10-19T19:20:42.737Z","level":"debug","message":"Stage completed: chat → prepare_context","context":{"duration":"0ms","module":"telemetry"},"error":null}
 {"timestamp":"2025-10-19T19:20:42.737Z","level":"debug","message":"Stage started: chat → llm_generation","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:20:51.029Z","level":"debug","message":"Stage completed: chat → llm_generation","context":{"duration":"8292ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:20:51.030Z","level":"debug","message":"Stage started: chat → save_assistant_message","context":{"module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:20:51.031Z","level":"debug","message":"Stage completed: chat → save_assistant_message","context":{"duration":"1ms","module":"telemetry"},"error":null}

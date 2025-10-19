@@ -75,3 +75,5 @@
 {"timestamp":"2025-10-19T19:19:48.149Z","level":"info","message":"Chat response generated","context":{"conversationId":"fdcf1614-49dc-4261-908d-28c063398ba3","module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T19:20:13.358Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
 {"timestamp":"2025-10-19T19:20:42.688Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"user","messageLength":7,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T19:20:51.034Z","level":"info","message":"Operation completed: chat","context":{"totalDuration":"8342ms","stages":"create_conversation:7ms, save_user_message:1ms, load_history:0ms, search_documents:18ms, search_knowledge_base:17ms, prepare_context:0ms, llm_generation:8292ms, save_assistant_message:1ms","module":"telemetry"},"error":null}
+{"timestamp":"2025-10-19T19:20:51.035Z","level":"info","message":"Chat response generated","context":{"conversationId":"3a64053e-d013-42b9-8778-5eb3ba024a2d","module":"routes/chat"},"error":null}
