@@ -25,3 +25,29 @@
 {"timestamp":"2025-10-19T17:54:17.700Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
 {"timestamp":"2025-10-19T17:54:34.018Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":24,"module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T17:54:52.422Z","level":"info","message":"Chat response generated","context":{"conversationId":"2ec00851-f6e9-4429-a493-e9e61d1e3216","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:56:28.130Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"user","messageLength":24,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:56:53.374Z","level":"info","message":"Chat response generated","context":{"conversationId":"9c120efb-45c1-433e-9e78-fbb67d1d05a3","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:58:12.063Z","level":"info","message":"Feedback saved","context":{"messageId":"msg-1760896613196","score":5,"module":"routes/messages"},"error":null}
+{"timestamp":"2025-10-19T18:23:52.484Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:24:06.139Z","level":"info","message":"Add fact request","context":{"category":"pecuaria","title":"Traseiro serrote - proporção carcaça bovina","module":"routes/knowledge"},"error":null}
+{"timestamp":"2025-10-19T18:24:06.139Z","level":"info","message":"Adding fact to knowledge base","context":{"category":"pecuaria","title":"Traseiro serrote - proporção carcaça bovina","module":"application/knowledge"},"error":null}
+{"timestamp":"2025-10-19T18:24:06.461Z","level":"info","message":"Fact added successfully","context":{"factId":"1163a03b-cc6d-453a-a4be-c1de0e651e9b","verified":true,"module":"application/knowledge"},"error":null}
+{"timestamp":"2025-10-19T18:24:15.102Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":56,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:25:01.985Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"user","messageLength":36,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:25:39.147Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:25:53.853Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":56,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:26:26.831Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":38,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:27:11.954Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":5,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:27:34.247Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:27:39.216Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":2,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:28:47.362Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:28:52.339Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":13,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:29:24.154Z","level":"info","message":"Chat response generated","context":{"conversationId":"f3d220ad-0280-482a-9d1e-d6cf3f917ae1","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:29:47.697Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"admin","messageLength":36,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:31:47.103Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:33:06.130Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T18:33:11.106Z","level":"info","message":"Add fact request","context":{"category":"pecuaria","title":"Traseiro serrote - carcaça bovina","module":"routes/knowledge"},"error":null}
+{"timestamp":"2025-10-19T18:33:11.107Z","level":"info","message":"Adding fact to knowledge base","context":{"category":"pecuaria","title":"Traseiro serrote - carcaça bovina","module":"application/knowledge"},"error":null}
+{"timestamp":"2025-10-19T18:33:11.455Z","level":"info","message":"Fact added successfully","context":{"factId":"6d632840-6e84-489c-b107-fc86d1a08706","verified":true,"module":"application/knowledge"},"error":null}
+{"timestamp":"2025-10-19T18:33:23.571Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":60,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T18:33:52.122Z","level":"info","message":"Chat response generated","context":{"conversationId":"131b3b6a-3b03-4732-a66d-a801c472cdb0","module":"routes/chat"},"error":null}

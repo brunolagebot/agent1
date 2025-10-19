@@ -40,14 +40,25 @@ async function chat({ conversationId = null, userMessage, userRole = 'user', use
   const history = await repo.getMessages(conversation.id);
   const messages = history.map(m => ({ role: m.role, content: m.content }));
 
-  // 4. RAG: buscar contexto relevante em documentos
+  // 4. RAG: buscar contexto relevante em documentos E knowledge base
   let contextFromDocs = '';
+  let contextFromKB = '';
+  
   if (useDocuments) {
     try {
+      // Buscar em documentos
       const docs = await searchDocuments(userMessage, 3);
       if (docs.length > 0) {
-        contextFromDocs = '\n\n[Contexto dos seus documentos]:\n' + 
+        contextFromDocs = '\n\n[Documentos]:\n' + 
           docs.map((d, i) => `${i + 1}. ${d.content}`).join('\n\n');
+      }
+      
+      // Buscar em Knowledge Base (sempre)
+      const { queryFacts } = require('../knowledge/query_facts');
+      const facts = await queryFacts(userMessage, 3);
+      if (facts.length > 0) {
+        contextFromKB = '\n\n[Base de Conhecimento Permanente]:\n' + 
+          facts.map((f, i) => `${i + 1}. ${f.title}: ${f.content}`).join('\n');
       }
     } catch (error) {
       console.error('[chat] RAG error (continuing without docs):', error.message);
@@ -55,10 +66,11 @@ async function chat({ conversationId = null, userMessage, userRole = 'user', use
   }
 
   // 5. Adicionar contexto ao sistema se houver
-  if (contextFromDocs) {
+  const allContext = contextFromKB + contextFromDocs;
+  if (allContext) {
     messages.unshift({
       role: 'system',
-      content: `Você é um assistente útil. Use o contexto fornecido para responder quando relevante.${contextFromDocs}`,
+      content: `Você é um assistente útil. Use o contexto fornecido para responder quando relevante.${allContext}`,
     });
   }
 
@@ -69,7 +81,11 @@ async function chat({ conversationId = null, userMessage, userRole = 'user', use
   const assistantMsg = Message.createAssistantMessage(
     conversation.id,
     response.content,
-    { model: response.model, usedDocuments: contextFromDocs.length > 0 }
+    { 
+      model: response.model, 
+      usedDocuments: contextFromDocs.length > 0,
+      usedKnowledgeBase: contextFromKB.length > 0
+    }
   );
   await repo.addMessage(assistantMsg);
 

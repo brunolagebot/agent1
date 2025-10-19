@@ -8,6 +8,7 @@ const { handleAdminRoutes } = require('./routes/admin.js');
 const { handleDocumentsRoutes } = require('./routes/documents.js');
 const { handleLogsRoutes } = require('./routes/logs.js');
 const { handleMessagesRoutes } = require('./routes/messages.js');
+const { handleKnowledgeRoutes } = require('./routes/knowledge.js');
 const { createLogger } = require('../../infra/logging/logger');
 
 const logger = createLogger('server');
@@ -67,6 +68,10 @@ function requestListener(req, res) {
 
   if (url.startsWith('/api/messages')) {
     return handleMessagesRoutes(url, req, res);
+  }
+
+  if (url.startsWith('/api/knowledge')) {
+    return handleKnowledgeRoutes(url, req, res);
   }
 
   logger.warn('Route not found', { url, method: req.method });

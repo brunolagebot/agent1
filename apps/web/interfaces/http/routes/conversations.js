@@ -58,6 +58,29 @@ async function handleListRoute(req, res) {
 }
 
 /**
+ * GET /api/conversations/:id/messages
+ * Busca mensagens de uma conversa
+ */
+async function handleGetMessagesRoute(conversationId, req, res) {
+  try {
+    const messages = await repo.getMessages(conversationId);
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ 
+      messages: messages.map(m => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: m.createdAt,
+      }))
+    }, null, 2));
+  } catch (error) {
+    console.error('[conversations/messages] Error:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: error.message }));
+  }
+}
+
+/**
  * Router para /api/conversations/*
  */
 function handleConversationsRoutes(url, req, res) {
@@ -67,6 +90,12 @@ function handleConversationsRoutes(url, req, res) {
   
   if (url === '/api/conversations' && req.method === 'GET') {
     return handleListRoute(req, res);
+  }
+
+  // /api/conversations/:id/messages
+  const messagesMatch = url.match(/^\/api\/conversations\/([a-f0-9-]+)\/messages$/);
+  if (messagesMatch && req.method === 'GET') {
+    return handleGetMessagesRoute(messagesMatch[1], req, res);
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });

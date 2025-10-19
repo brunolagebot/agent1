@@ -6,13 +6,14 @@
 const http = require('http');
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:7b-instruct-q4_K_M';
+const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:14b-instruct-q4_K_M';
 
 /**
  * Gera resposta via Ollama
  */
 async function generate({ model = DEFAULT_MODEL, messages, temperature = 0.7, maxTokens = 2048 } = {}) {
-  const url = new URL('/api/chat', OLLAMA_URL);
+  // Parse OLLAMA_URL (ex: http://ollama:11434)
+  const url = new URL(OLLAMA_URL);
   const payload = {
     model,
     messages: messages.map(m => ({ role: m.role, content: m.content })),
@@ -28,7 +29,7 @@ async function generate({ model = DEFAULT_MODEL, messages, temperature = 0.7, ma
       method: 'POST',
       hostname: url.hostname,
       port: url.port || 11434,
-      path: url.pathname,
+      path: '/api/chat',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -39,7 +40,10 @@ async function generate({ model = DEFAULT_MODEL, messages, temperature = 0.7, ma
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
         try {
+          console.log('[ollama_client] Raw response:', data.slice(0, 500));
           const parsed = JSON.parse(data);
+          console.log('[ollama_client] Parsed:', JSON.stringify(parsed).slice(0, 200));
+          
           if (parsed.message && parsed.message.content) {
             resolve({
               content: parsed.message.content,
@@ -47,9 +51,11 @@ async function generate({ model = DEFAULT_MODEL, messages, temperature = 0.7, ma
               done: parsed.done,
             });
           } else {
-            reject(new Error('Invalid response from Ollama'));
+            console.error('[ollama_client] Missing message.content:', JSON.stringify(parsed));
+            reject(new Error(`Invalid response from Ollama: ${JSON.stringify(parsed).slice(0, 200)}`));
           }
         } catch (err) {
+          console.error('[ollama_client] Parse error:', err.message, 'Data:', data.slice(0, 500));
           reject(err);
         }
       });

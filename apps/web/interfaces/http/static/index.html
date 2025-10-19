@@ -15,8 +15,88 @@
     }
     
     .container { 
-      max-width: 1000px; 
-      margin: 0 auto; 
+      max-width: 1400px; 
+      margin: 0 auto;
+      display: flex;
+      gap: 20px;
+    }
+    
+    .sidebar {
+      width: 280px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+      animation: slideInLeft 0.6s ease-out;
+    }
+    
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .main-content {
+      flex: 1;
+    }
+    
+    .sidebar h3 {
+      font-size: 1.1em;
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+    
+    .new-chat-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .new-chat-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .conversation-item {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+    
+    .conversation-item:hover {
+      background: #f7fafc;
+      border-color: #e2e8f0;
+    }
+    
+    .conversation-item.active {
+      background: #edf2f7;
+      border-color: #667eea;
+    }
+    
+    .conversation-title {
+      font-size: 0.9em;
+      color: #2d3748;
+      font-weight: 500;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .conversation-date {
+      font-size: 0.75em;
+      color: #a0aec0;
     }
     
     .header {
@@ -337,43 +417,51 @@
   </style>
 </head>
 <body>
+  <div class="header">
+    <h1>🤖 Agent1</h1>
+    <p>Chat Inteligente com RAG • Qwen2.5:14b • Treinamento Automático</p>
+  </div>
+
+  <div class="mode">
+    <label>
+      <input type="radio" name="userRole" value="user" checked>
+      <span>👤 Usuário</span>
+    </label>
+    <label>
+      <input type="radio" name="userRole" value="admin">
+      <span>👑 Admin</span>
+    </label>
+  </div>
+
   <div class="container">
-    <div class="header">
-      <h1>🤖 Agent1</h1>
-      <p>Chat Inteligente com RAG • Qwen2.5 • Treinamento Automático</p>
+    <div class="sidebar">
+      <button class="new-chat-btn" onclick="startNewChat()">➕ Nova Conversa</button>
+      <h3>💬 Histórico</h3>
+      <div id="conversationsList"></div>
     </div>
 
-    <div class="mode">
-      <label>
-        <input type="radio" name="userRole" value="user" checked>
-        <span>👤 Usuário</span>
-      </label>
-      <label>
-        <input type="radio" name="userRole" value="admin">
-        <span>👑 Admin</span>
-      </label>
-    </div>
-
-    <div class="upload-section">
-      <h3>📄 Biblioteca de Conhecimento</h3>
-      <p class="subtitle">Envie PDFs ou arquivos de texto para o agente aprender automaticamente</p>
-      <div class="input-group">
-        <input type="file" id="fileInput" accept=".pdf,.txt,.md">
-        <button onclick="uploadDocument()">📤 Enviar Documento</button>
+    <div class="main-content">
+      <div class="upload-section">
+        <h3>📄 Biblioteca de Conhecimento</h3>
+        <p class="subtitle">Envie PDFs ou arquivos de texto para o agente aprender automaticamente</p>
+        <div class="input-group">
+          <input type="file" id="fileInput" accept=".pdf,.txt,.md">
+          <button onclick="uploadDocument()">📤 Enviar Documento</button>
+        </div>
+        <div id="uploadStatus"></div>
       </div>
-      <div id="uploadStatus"></div>
-    </div>
 
-    <div class="chat-section">
-      <h3>💬 Conversa</h3>
-      <div class="progress-bar" id="progressBar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <div class="status-text" id="statusText"></div>
-      <div id="messages"></div>
-      <div class="input-group">
-        <input type="text" id="messageInput" placeholder="Digite sua mensagem ou pergunte sobre seus documentos..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button id="sendBtn" onclick="sendMessage()">Enviar ✈️</button>
+      <div class="chat-section">
+        <h3>💬 Conversa</h3>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-text" id="statusText"></div>
+        <div id="messages"></div>
+        <div class="input-group">
+          <input type="text" id="messageInput" placeholder="Digite sua mensagem ou pergunte sobre seus documentos..." onkeypress="if(event.key==='Enter') sendMessage()">
+          <button id="sendBtn" onclick="sendMessage()">Enviar ✈️</button>
+        </div>
       </div>
     </div>
   </div>
@@ -381,9 +469,79 @@
   <script>
     let conversationId = null;
     let currentMessageId = null;
+    let conversations = [];
+
+    // Carregar histórico ao iniciar
+    window.addEventListener('DOMContentLoaded', () => {
+      loadConversations();
+    });
 
     function getUserRole() {
       return document.querySelector('input[name="userRole"]:checked').value;
+    }
+
+    async function loadConversations() {
+      try {
+        const res = await fetch('/api/conversations');
+        const data = await res.json();
+        conversations = data.conversations || [];
+        renderConversationsList();
+      } catch (error) {
+        console.error('Failed to load conversations:', error);
+      }
+    }
+
+    function renderConversationsList() {
+      const list = document.getElementById('conversationsList');
+      list.innerHTML = '';
+
+      if (conversations.length === 0) {
+        list.innerHTML = '<p style="color: #a0aec0; font-size: 0.85em; text-align: center;">Nenhuma conversa ainda</p>';
+        return;
+      }
+
+      conversations.slice(0, 20).forEach(conv => {
+        const item = document.createElement('div');
+        item.className = 'conversation-item' + (conv.id === conversationId ? ' active' : '');
+        item.onclick = () => loadConversation(conv.id);
+        
+        const title = document.createElement('div');
+        title.className = 'conversation-title';
+        title.textContent = conv.title || 'Nova conversa';
+        
+        const date = document.createElement('div');
+        date.className = 'conversation-date';
+        date.textContent = new Date(conv.createdAt).toLocaleDateString('pt-BR');
+        
+        item.appendChild(title);
+        item.appendChild(date);
+        list.appendChild(item);
+      });
+    }
+
+    async function loadConversation(id) {
+      try {
+        conversationId = id;
+        renderConversationsList();
+
+        // Buscar mensagens
+        const res = await fetch(`/api/conversations/${id}/messages`);
+        const data = await res.json();
+        
+        // Limpar e renderizar mensagens
+        document.getElementById('messages').innerHTML = '';
+        data.messages.forEach(msg => {
+          addMessage(msg.role, msg.content, msg.id);
+        });
+      } catch (error) {
+        console.error('Failed to load conversation:', error);
+      }
+    }
+
+    function startNewChat() {
+      conversationId = null;
+      document.getElementById('messages').innerHTML = '';
+      renderConversationsList();
     }
 
     function showProgress(text, percent = 0) {
@@ -493,6 +651,9 @@
         conversationId = data.conversationId;
         const msgId = `msg-${Date.now()}`;
         addMessage('assistant', data.assistantMessage, msgId);
+        
+        // Recarregar histórico para mostrar nova conversa
+        loadConversations();
         
         hideProgress();
       } catch (error) {

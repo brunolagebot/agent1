@@ -12,10 +12,11 @@ const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || 'nomic-embed-text';
  * Gera embedding para um texto
  */
 async function generateEmbedding(text) {
-  const url = new URL('/api/embed', OLLAMA_URL);  // Corrigido: /api/embed
+  // Parse OLLAMA_URL
+  const url = new URL(OLLAMA_URL);
   const payload = {
     model: EMBEDDING_MODEL,
-    input: text,  // Corrigido: input ao invés de prompt
+    input: text,
   };
 
   return new Promise((resolve, reject) => {
@@ -23,7 +24,7 @@ async function generateEmbedding(text) {
       method: 'POST',
       hostname: url.hostname,
       port: url.port || 11434,
-      path: url.pathname,
+      path: '/api/embed',
       headers: {
         'Content-Type': 'application/json',
       },
