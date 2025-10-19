@@ -623,7 +623,7 @@
       const el = document.getElementById('stage-' + stageKey);
       if (!el) return;
       
-      el.className = \`stage-item \${status}\`;
+      el.className = 'stage-item ' + status;
       const timeEl = el.querySelector('.stage-time');
       
       if (status === 'current') {
