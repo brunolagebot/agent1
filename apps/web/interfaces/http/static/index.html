@@ -256,6 +256,84 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    
+    .progress-bar {
+      margin: 15px 0;
+      background: #e2e8f0;
+      border-radius: 10px;
+      height: 6px;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .progress-bar.active {
+      display: block;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .status-text {
+      text-align: center;
+      color: #718096;
+      font-size: 14px;
+      margin-top: 8px;
+      display: none;
+    }
+    
+    .status-text.active {
+      display: block;
+    }
+    
+    .feedback-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      justify-content: flex-end;
+      opacity: 0;
+      animation: fadeIn 0.5s ease-in forwards;
+      animation-delay: 0.3s;
+    }
+    
+    .feedback-btn {
+      padding: 6px 12px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s ease;
+    }
+    
+    .feedback-btn:hover {
+      transform: scale(1.15);
+      border-color: #667eea;
+    }
+    
+    .feedback-btn.selected {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #667eea;
+      transform: scale(1.2);
+    }
+    
+    .message-container {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .assistant .message-container {
+      align-items: flex-start;
+    }
   </style>
 </head>
 <body>
@@ -288,53 +366,144 @@
 
     <div class="chat-section">
       <h3>💬 Conversa</h3>
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="status-text" id="statusText"></div>
       <div id="messages"></div>
       <div class="input-group">
         <input type="text" id="messageInput" placeholder="Digite sua mensagem ou pergunte sobre seus documentos..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()">Enviar ✈️</button>
+        <button id="sendBtn" onclick="sendMessage()">Enviar ✈️</button>
       </div>
     </div>
   </div>
 
   <script>
     let conversationId = null;
+    let currentMessageId = null;
 
     function getUserRole() {
       return document.querySelector('input[name="userRole"]:checked').value;
     }
 
-    function addMessage(role, content) {
+    function showProgress(text, percent = 0) {
+      const bar = document.getElementById('progressBar');
+      const fill = document.getElementById('progressFill');
+      const status = document.getElementById('statusText');
+      
+      bar.classList.add('active');
+      status.classList.add('active');
+      status.textContent = text;
+      fill.style.width = percent + '%';
+    }
+
+    function hideProgress() {
+      const bar = document.getElementById('progressBar');
+      const status = document.getElementById('statusText');
+      bar.classList.remove('active');
+      status.classList.remove('active');
+    }
+
+    function addMessage(role, content, messageId = null) {
       const messagesDiv = document.getElementById('messages');
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message ' + role;
-      msgDiv.textContent = content;
-      messagesDiv.appendChild(msgDiv);
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'message ' + role;
+      containerDiv.dataset.messageId = messageId;
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-container';
+      contentDiv.textContent = content;
+      
+      // Adicionar feedback apenas para assistant
+      if (role === 'assistant' && messageId) {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'feedback-buttons';
+        
+        const emojis = ['😞', '😕', '😐', '🙂', '😍'];
+        for (let i = 1; i <= 5; i++) {
+          const btn = document.createElement('button');
+          btn.className = 'feedback-btn';
+          btn.textContent = emojis[i-1];
+          btn.title = `Avaliar com ${i} estrela${i>1?'s':''}`;
+          btn.onclick = () => submitFeedback(messageId, i, btn);
+          feedbackDiv.appendChild(btn);
+        }
+        
+        contentDiv.appendChild(feedbackDiv);
+      }
+      
+      containerDiv.appendChild(contentDiv);
+      messagesDiv.appendChild(containerDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      
+      return messageId;
+    }
+
+    async function submitFeedback(messageId, score, btn) {
+      try {
+        // Marcar visualmente
+        const allBtns = btn.parentElement.querySelectorAll('.feedback-btn');
+        allBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        
+        // Enviar ao servidor
+        await fetch('/api/messages/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageId, score }),
+        });
+      } catch (error) {
+        console.error('Feedback error:', error);
+      }
     }
 
     async function sendMessage() {
       const input = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
       const message = input.value.trim();
       if (!message) return;
 
       const userRole = getUserRole();
       addMessage('user', message);
       input.value = '';
+      sendBtn.disabled = true;
 
       try {
+        showProgress('🔍 Buscando contexto em documentos...', 20);
+        
+        setTimeout(() => showProgress('🤖 Gerando resposta...', 50), 1000);
+        setTimeout(() => showProgress('✨ Finalizando...', 80), 3000);
+        
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+        
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ conversationId, message, userRole }),
+          signal: controller.signal,
         });
+
+        clearTimeout(timeout);
+        showProgress('✅ Pronto!', 100);
 
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
         conversationId = data.conversationId;
-        addMessage('assistant', data.assistantMessage);
+        const msgId = `msg-${Date.now()}`;
+        addMessage('assistant', data.assistantMessage, msgId);
+        
+        hideProgress();
       } catch (error) {
-        addMessage('assistant', `Erro: ${error.message}`);
+        hideProgress();
+        if (error.name === 'AbortError') {
+          addMessage('assistant', `⏱️ Timeout: A resposta demorou muito (>60s). Tente novamente ou simplifique a pergunta.`);
+        } else {
+          addMessage('assistant', `❌ Erro: ${error.message}`);
+        }
+      } finally {
+        sendBtn.disabled = false;
       }
     }
 
@@ -350,9 +519,12 @@
       formData.append('file', file);
       formData.append('userRole', getUserRole());
 
-      showUploadStatus('Processando...', 'success');
+      showUploadStatus('📄 Lendo arquivo...', 'success');
 
       try {
+        setTimeout(() => showUploadStatus('✂️ Dividindo em chunks...', 'success'), 500);
+        setTimeout(() => showUploadStatus('🧠 Gerando embeddings...', 'success'), 1500);
+        
         const res = await fetch('/api/documents/upload', {
           method: 'POST',
           body: formData,
@@ -361,10 +533,10 @@
         const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        showUploadStatus(`✅ ${data.filename} processado (${data.chunksCount} chunks)`, 'success');
+        showUploadStatus(`✅ ${data.filename} processado (${data.chunksCount} chunks). Agente aprendeu o conteúdo!`, 'success');
         fileInput.value = '';
       } catch (error) {
-        showUploadStatus(`Erro: ${error.message}`, 'error');
+        showUploadStatus(`❌ Erro: ${error.message}`, 'error');
       }
     }
 

@@ -147,6 +147,28 @@ docker compose -f docker-compose.prod.yml logs -f web
 docker compose -f docker-compose.prod.yml down
 ```
 
+## Sistema de Feedback
+
+### Feedback de Respostas (5 níveis)
+A interface mostra 5 emojis abaixo de cada resposta do assistente:
+- 😞 (1) - Muito ruim
+- 😕 (2) - Ruim  
+- 😐 (3) - Regular
+- 🙂 (4) - Bom
+- 😍 (5) - Excelente
+
+**Clique no emoji** para avaliar automaticamente.
+
+### Ver estatísticas de feedback
+```bash
+curl http://web.localhost/api/messages/feedback-stats
+```
+
+### Como o feedback melhora o modelo
+- Respostas com score alto (4-5) são priorizadas para fine-tuning
+- Respostas com score baixo (1-2) ajudam a identificar problemas
+- Sistema aprende padrões do que funciona melhor
+
 ## Acesso Remoto (fora da rede local)
 
 ### Opção 1: DNS Público

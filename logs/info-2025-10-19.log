@@ -5,3 +5,23 @@
 {"timestamp":"2025-10-19T17:46:15.069Z","level":"info","message":"Chat request received","context":{"userRole":"admin","messageLength":29,"module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T17:46:24.499Z","level":"info","message":"Chat response generated","context":{"conversationId":"80de30af-f8ee-4662-b47e-51175804d1e4","module":"routes/chat"},"error":null}
 {"timestamp":"2025-10-19T17:46:34.778Z","level":"info","message":"Log analysis requested","context":{"module":"routes/logs"},"error":null}
+{"timestamp":"2025-10-19T17:48:19.497Z","level":"info","message":"Upload request started","context":{"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:48:19.516Z","level":"info","message":"File received","context":{"filename":"1ª ALTERAÇÃO CONTRATUAL - BOTOCLINIC SINOP ESTETICA FACIAL LTDA.pdf","size":1707382,"type":"application/pdf","module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:48:27.194Z","level":"info","message":"Document ingested successfully","context":{"documentId":"bcd98a94-4970-4f1c-b99c-f5e364b6e825","chunks":51,"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:48:33.123Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"user","messageLength":12,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:49:06.012Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"user","messageLength":2,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:49:14.807Z","level":"info","message":"Upload request started","context":{"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:49:14.809Z","level":"info","message":"File received","context":{"filename":"1a Alt Contrato Social_BotocSinop_21-03-2022.pdf","size":139328,"type":"application/pdf","module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:49:22.818Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"admin","messageLength":19,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:49:38.343Z","level":"info","message":"Chat response generated","context":{"conversationId":"d9e415a0-64d3-4b0f-846a-d5e84be2be05","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:49:48.049Z","level":"info","message":"Document ingested successfully","context":{"documentId":"4f04e83f-98e6-4c43-8633-92e61cc2d018","chunks":23,"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:49:50.501Z","level":"info","message":"Chat response generated","context":{"conversationId":"dfcee67f-0443-4a7a-9fa0-cde9f4a00fe2","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:49:59.349Z","level":"info","message":"Upload request started","context":{"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:49:59.367Z","level":"info","message":"File received","context":{"filename":"1ª ALTERAÇÃO CONTRATUAL - BOTOCLINIC SINOP ESTETICA FACIAL LTDA.pdf","size":1707382,"type":"application/pdf","module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:50:14.707Z","level":"info","message":"Chat request received","context":{"conversationId":null,"userRole":"admin","messageLength":56,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:51:00.804Z","level":"info","message":"Document ingested successfully","context":{"documentId":"cd951a6c-d2ef-47b1-a1c4-864cf37d935d","chunks":51,"module":"routes/documents"},"error":null}
+{"timestamp":"2025-10-19T17:51:01.381Z","level":"info","message":"Chat response generated","context":{"conversationId":"34cc13b3-c1eb-499b-8e02-32efa01f97c5","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:51:39.529Z","level":"info","message":"Chat response generated","context":{"conversationId":"d42bda30-c2d4-4656-b371-8f60dc4be5ff","module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:54:17.700Z","level":"info","message":"Server started","context":{"port":3000,"env":"development","module":"server"},"error":null}
+{"timestamp":"2025-10-19T17:54:34.018Z","level":"info","message":"Chat request received","context":{"userRole":"user","messageLength":24,"module":"routes/chat"},"error":null}
+{"timestamp":"2025-10-19T17:54:52.422Z","level":"info","message":"Chat response generated","context":{"conversationId":"2ec00851-f6e9-4429-a493-e9e61d1e3216","module":"routes/chat"},"error":null}
