@@ -4,47 +4,118 @@
  */
 
 const fs = require('fs').promises;
+const XLSX = require('xlsx');
 const { createLogger } = require('../logging/logger');
 
 const logger = createLogger('spreadsheet-parser');
 
 /**
- * Parse CSV simples
+ * Parse CSV robusto
  */
 function parseCSV(content) {
   const lines = content.split('\n').filter(line => line.trim());
   if (lines.length === 0) return { headers: [], rows: [] };
   
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  // Função para fazer parse de uma linha CSV considerando aspas
+  function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          // Aspas duplas escapadas
+          current += '"';
+          i++; // Pular próxima aspa
+        } else {
+          // Toggle aspas
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // Separador encontrado fora de aspas
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    // Adicionar último campo
+    result.push(current.trim());
+    return result;
+  }
+  
+  // Parse headers
+  const headers = parseCSVLine(lines[0]).map(h => h.replace(/^"|"$/g, ''));
+  
+  // Parse rows
   const rows = lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+    const values = parseCSVLine(line).map(v => v.replace(/^"|"$/g, ''));
     const row = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
     });
     return row;
+  }).filter(row => Object.values(row).some(v => v !== ''));
+  
+  logger.info('CSV parseado com sucesso', { 
+    headers: headers.length, 
+    rows: rows.length 
   });
   
   return { headers, rows };
 }
 
 /**
- * Parse Excel usando biblioteca externa (simulado)
+ * Parse Excel usando biblioteca xlsx
  */
 async function parseExcel(buffer) {
-  // Em produção, usar biblioteca como 'xlsx' ou 'exceljs'
-  // Por enquanto, simular parsing básico
-  
-  logger.warn('Parsing de Excel não implementado completamente. Use CSV para melhor compatibilidade.');
-  
-  // Simular estrutura básica
-  return {
-    headers: ['Coluna1', 'Coluna2', 'Coluna3'],
-    rows: [
-      { Coluna1: 'Valor1', Coluna2: 'Valor2', Coluna3: 'Valor3' },
-      { Coluna1: 'Valor4', Coluna2: 'Valor5', Coluna3: 'Valor6' }
-    ]
-  };
+  try {
+    // Ler workbook do buffer
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    
+    // Pegar primeira planilha
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) {
+      throw new Error('Nenhuma planilha encontrada no arquivo Excel');
+    }
+    
+    const worksheet = workbook.Sheets[sheetName];
+    
+    // Converter para JSON
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    
+    if (jsonData.length === 0) {
+      return { headers: [], rows: [] };
+    }
+    
+    // Primeira linha são os headers
+    const headers = jsonData[0].map(h => String(h || '').trim()).filter(h => h);
+    
+    // Resto são os dados
+    const rows = jsonData.slice(1).map(row => {
+      const rowObj = {};
+      headers.forEach((header, index) => {
+        rowObj[header] = row[index] || '';
+      });
+      return rowObj;
+    }).filter(row => Object.values(row).some(v => v !== ''));
+    
+    logger.info('Excel parseado com sucesso', { 
+      sheetName, 
+      headers: headers.length, 
+      rows: rows.length 
+    });
+    
+    return { headers, rows };
+    
+  } catch (error) {
+    logger.error('Erro ao fazer parse do Excel', {}, error);
+    throw new Error(`Erro ao processar arquivo Excel: ${error.message}`);
+  }
 }
 
 /**
@@ -87,18 +158,33 @@ function analyzeSpreadsheetStructure(data) {
   let type = 'generic';
   let description = 'Planilha genérica';
   
-  if (headers.some(h => h.toLowerCase().includes('nome') || h.toLowerCase().includes('name'))) {
+  // Detectar tipo por headers
+  const headerLower = headers.map(h => h.toLowerCase());
+  
+  if (headerLower.some(h => h.includes('nome') || h.includes('name') || h.includes('cliente') || h.includes('pessoa'))) {
     type = 'contacts';
     description = 'Lista de contatos/pessoas';
-  } else if (headers.some(h => h.toLowerCase().includes('produto') || h.toLowerCase().includes('product'))) {
+  } else if (headerLower.some(h => h.includes('produto') || h.includes('product') || h.includes('item') || h.includes('serviço'))) {
     type = 'products';
-    description = 'Catálogo de produtos';
-  } else if (headers.some(h => h.toLowerCase().includes('data') || h.toLowerCase().includes('date'))) {
+    description = 'Catálogo de produtos/serviços';
+  } else if (headerLower.some(h => h.includes('data') || h.includes('date') || h.includes('tempo') || h.includes('período'))) {
     type = 'time_series';
     description = 'Dados temporais/séries';
-  } else if (headers.some(h => h.toLowerCase().includes('valor') || h.toLowerCase().includes('price'))) {
+  } else if (headerLower.some(h => h.includes('valor') || h.includes('price') || h.includes('preço') || h.includes('custo') || h.includes('receita'))) {
     type = 'financial';
     description = 'Dados financeiros';
+  } else if (headerLower.some(h => h.includes('email') || h.includes('telefone') || h.includes('phone'))) {
+    type = 'contacts';
+    description = 'Lista de contatos';
+  } else if (headerLower.some(h => h.includes('endereço') || h.includes('address') || h.includes('cidade') || h.includes('city'))) {
+    type = 'locations';
+    description = 'Dados de localização';
+  } else if (headerLower.some(h => h.includes('venda') || h.includes('sale') || h.includes('pedido') || h.includes('order'))) {
+    type = 'sales';
+    description = 'Dados de vendas';
+  } else if (headerLower.some(h => h.includes('funcionário') || h.includes('employee') || h.includes('colaborador'))) {
+    type = 'employees';
+    description = 'Dados de funcionários';
   }
   
   return {

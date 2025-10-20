@@ -7,13 +7,19 @@
     "start": "node apps/web/interfaces/http/server.js",
     "dev": "node apps/web/interfaces/http/server.js"
   },
-  "keywords": ["llm", "chat", "saas", "modular", "rag"],
+  "keywords": [
+    "llm",
+    "chat",
+    "saas",
+    "modular",
+    "rag"
+  ],
   "author": "Bruno Lage",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.13.1",
+    "formidable": "^3.5.1",
     "pdf-parse": "^1.1.1",
-    "formidable": "^3.5.1"
+    "pg": "^8.13.1",
+    "xlsx": "^0.18.5"
   }
 }
-

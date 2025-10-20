@@ -246,6 +246,60 @@ async function generateTypeSpecificQA(document, structure, rawData) {
         }
       }
       break;
+
+    case 'locations':
+      const addressCol = headers.find(h => h.toLowerCase().includes('endereço') || h.toLowerCase().includes('address'));
+      if (addressCol && rows.length > 0) {
+        const addresses = rows.slice(0, 3).map(row => row[addressCol]).filter(a => a);
+        qaPairs.push({
+          question: `Que localizações estão na planilha "${document.filename}"?`,
+          answer: `A planilha "${document.filename}" inclui localizações como: ${addresses.join(', ')}${rows.length > 3 ? ' e outras' : ''}.`,
+          context: 'Dados de localização',
+          source: {
+            documentId: document.id,
+            filename: document.filename,
+            description: document.description
+          },
+          generatedAt: new Date().toISOString()
+        });
+      }
+      break;
+
+    case 'sales':
+      const salesCol = headers.find(h => h.toLowerCase().includes('venda') || h.toLowerCase().includes('sale'));
+      if (salesCol && rows.length > 0) {
+        const sales = rows.slice(0, 3).map(row => row[salesCol]).filter(s => s);
+        qaPairs.push({
+          question: `Que dados de vendas estão na planilha "${document.filename}"?`,
+          answer: `A planilha "${document.filename}" contém dados de vendas incluindo: ${sales.join(', ')}${rows.length > 3 ? ' e outros' : ''}.`,
+          context: 'Dados de vendas',
+          source: {
+            documentId: document.id,
+            filename: document.filename,
+            description: document.description
+          },
+          generatedAt: new Date().toISOString()
+        });
+      }
+      break;
+
+    case 'employees':
+      const employeeCol = headers.find(h => h.toLowerCase().includes('funcionário') || h.toLowerCase().includes('employee'));
+      if (employeeCol && rows.length > 0) {
+        const employees = rows.slice(0, 3).map(row => row[employeeCol]).filter(e => e);
+        qaPairs.push({
+          question: `Que funcionários estão listados na planilha "${document.filename}"?`,
+          answer: `A planilha "${document.filename}" inclui funcionários como: ${employees.join(', ')}${rows.length > 3 ? ' e outros' : ''}.`,
+          context: 'Dados de funcionários',
+          source: {
+            documentId: document.id,
+            filename: document.filename,
+            description: document.description
+          },
+          generatedAt: new Date().toISOString()
+        });
+      }
+      break;
   }
 
   return qaPairs;

@@ -701,6 +701,7 @@
           <div style="color: #7a9ca8; font-size: 12px; margin-bottom: 15px;">
             💡 <strong>Dica:</strong> Você pode selecionar múltiplos arquivos (PDF/TXT/MD/CSV/Excel) de uma vez. Máximo 10MB por arquivo.<br>
             📊 <strong>Planilhas:</strong> CSV e Excel são analisadas automaticamente para gerar QA estruturada.<br>
+            🎯 <strong>Tipos Detectados:</strong> Contatos, Produtos, Financeiro, Vendas, Funcionários, Localização.<br>
             📝 A descrição será aplicada a todos os arquivos selecionados.
           </div>
           
@@ -852,11 +853,23 @@
             </div>
           `;
         } else {
-          documentsHtml = documents.map(doc => `
-            <div style="background: #1a2332; padding: 15px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #2d6a7a;">
+          documentsHtml = documents.map(doc => {
+            const isSpreadsheet = doc.filename.toLowerCase().endsWith('.csv') || 
+                                 doc.filename.toLowerCase().endsWith('.xlsx') || 
+                                 doc.filename.toLowerCase().endsWith('.xls');
+            
+            const spreadsheetInfo = isSpreadsheet && doc.metadata && doc.metadata.structure ? 
+              `<div style="color: #5db88f; font-size: 11px; margin-top: 3px;">
+                📊 ${doc.metadata.structure.type || 'planilha'} • ${doc.metadata.structure.rows || 0} linhas • ${doc.metadata.structure.columns || 0} colunas
+              </div>` : '';
+            
+            return `
+            <div style="background: #1a2332; padding: 15px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid ${isSpreadsheet ? '#5db88f' : '#2d6a7a'};">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="flex: 1;">
-                  <div style="color: #a8c5d1; font-weight: bold; margin-bottom: 5px;">${doc.filename}</div>
+                  <div style="color: #a8c5d1; font-weight: bold; margin-bottom: 5px;">
+                    ${isSpreadsheet ? '📊' : '📄'} ${doc.filename}
+                  </div>
                   <div id="description-${doc.id}" style="margin-bottom: 5px;">
                     ${doc.description ? `<div style="color: #5db88f; font-size: 12px; font-style: italic;">📝 ${doc.description}</div>` : '<div style="color: #7a9ca8; font-size: 12px; font-style: italic;">📝 Sem descrição</div>'}
                   </div>
@@ -865,6 +878,7 @@
                     ${doc.processed ? '✅ Processado' : '⏳ Processando'} • 
                     📅 ${new Date(doc.createdAt).toLocaleDateString('pt-BR')}
                   </div>
+                  ${spreadsheetInfo}
                 </div>
                 <div style="display: flex; gap: 5px; margin-left: 10px;">
                   <button onclick="editDescription('${doc.id}', '${doc.filename}', '${(doc.description || '').replace(/'/g, "\\'")}')" 
@@ -878,7 +892,8 @@
                 </div>
               </div>
             </div>
-          `).join('');
+          `;
+          }).join('');
         }
         
         document.getElementById('adminContent').innerHTML = `
