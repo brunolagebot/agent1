@@ -14,6 +14,9 @@ const {
   generateDocumentHash 
 } = require('./finetuning_cache');
 const { generateSpreadsheetQA } = require('./spreadsheet_qa_generator');
+const { generateTemplateBasedQA } = require('./qa_template_engine');
+const { validateAndImproveQA } = require('./qa_quality_validator');
+const { recordQAGeneration, recordQAValidation } = require('./qa_metrics_tracker');
 
 const logger = createLogger('document-qa-generator');
 const documentsRepo = new PostgresDocumentsRepository();
@@ -235,65 +238,520 @@ function splitIntoChunks(text, minLength, maxLength) {
 }
 
 /**
- * Gera QA básico baseado no conteúdo do documento
+ * Gera QA inteligente baseado no conteúdo do documento
  */
-function generateBasicQA(document, maxQuestions = 3) {
-  const qaPairs = [];
+function generateBasicQA(document, maxQuestions = 5) {
   const { filename, description, contentText } = document;
   
-  // Extrair informações básicas do documento
-  const lines = contentText.split('\n').filter(line => line.trim().length > 10);
+  // Análise avançada do conteúdo
+  const analysis = analyzeDocumentContent(contentText, filename);
   
-  if (lines.length === 0) {
-    return qaPairs;
+  if (analysis.isEmpty) {
+    return [];
   }
   
-  // QA 1: Sobre o documento
-  qaPairs.push({
-    question: `O que é o documento "${filename}"?`,
-    answer: description || `Este é um documento chamado "${filename}" que contém informações relevantes.`,
-    context: 'Informações gerais do documento',
+  // Usar template engine para gerar Q&A mais inteligente
+  const templateQAs = generateTemplateBasedQA(document, analysis, maxQuestions);
+  
+  // Se não gerou Q&A suficiente com templates, usar método tradicional
+  let allQAs = templateQAs;
+  if (templateQAs.length < maxQuestions) {
+    const traditionalQAs = generateTraditionalQA(document, analysis, maxQuestions - templateQAs.length);
+    allQAs = [...templateQAs, ...traditionalQAs];
+  }
+  
+  // Validar e melhorar a qualidade dos Q&A
+  const validationStartTime = Date.now();
+  const validatedQAs = validateAndImproveQA(allQAs);
+  const validationTime = Date.now() - validationStartTime;
+  
+  // Registrar métricas
+  recordQAGeneration(document, allQAs, generationTime);
+  recordQAValidation(validatedQAs, validationTime);
+  
+  logger.info(`Q&A gerado para ${document.filename}: ${validatedQAs.length} pares validados`, {
+    totalGenerated: allQAs.length,
+    validated: validatedQAs.length,
+    generationTime: generationTime + 'ms',
+    validationTime: validationTime + 'ms'
+  });
+  
+  return validatedQAs;
+}
+
+/**
+ * Gera Q&A usando método tradicional (fallback)
+ */
+function generateTraditionalQA(document, analysis, maxQuestions) {
+  const qaPairs = [];
+  
+  // QA 1: Identificação do documento
+  qaPairs.push(generateDocumentIdentificationQA(document, analysis));
+  
+  // QA 2: Conteúdo principal
+  if (analysis.mainTopics.length > 0) {
+    qaPairs.push(generateMainContentQA(document, analysis));
+  }
+  
+  // QA 3: Informações específicas baseadas no tipo
+  if (analysis.documentType === 'contract') {
+    qaPairs.push(generateContractQA(document, analysis));
+  } else if (analysis.documentType === 'financial') {
+    qaPairs.push(generateFinancialQA(document, analysis));
+  } else if (analysis.documentType === 'technical') {
+    qaPairs.push(generateTechnicalQA(document, analysis));
+  } else if (analysis.documentType === 'spreadsheet') {
+    qaPairs.push(generateSpreadsheetQA(document, analysis));
+  }
+  
+  // QA 4: Dados estruturados (se houver)
+  if (analysis.structuredData.length > 0) {
+    qaPairs.push(generateStructuredDataQA(document, analysis));
+  }
+  
+  // QA 5: Informações de contato/localização (se houver)
+  if (analysis.contactInfo.length > 0 || analysis.addresses.length > 0) {
+    qaPairs.push(generateContactLocationQA(document, analysis));
+  }
+  
+  // QA 6: Datas e prazos (se houver)
+  if (analysis.dates.length > 0) {
+    qaPairs.push(generateDatesQA(document, analysis));
+  }
+  
+  // QA 7: Valores monetários (se houver)
+  if (analysis.monetaryValues.length > 0) {
+    qaPairs.push(generateMonetaryQA(document, analysis));
+  }
+  
+  // Limitar ao número máximo solicitado
+  return qaPairs.slice(0, maxQuestions);
+}
+
+/**
+ * Analisa o conteúdo do documento de forma inteligente
+ */
+function analyzeDocumentContent(contentText, filename) {
+  const analysis = {
+    isEmpty: contentText.trim().length < 50,
+    documentType: 'general',
+    mainTopics: [],
+    structuredData: [],
+    contactInfo: [],
+    addresses: [],
+    dates: [],
+    monetaryValues: [],
+    entities: [],
+    keywords: []
+  };
+  
+  if (analysis.isEmpty) return analysis;
+  
+  // Detectar tipo de documento
+  analysis.documentType = detectDocumentType(contentText, filename);
+  
+  // Extrair tópicos principais
+  analysis.mainTopics = extractMainTopics(contentText);
+  
+  // Extrair dados estruturados
+  analysis.structuredData = extractStructuredData(contentText);
+  
+  // Extrair informações de contato
+  analysis.contactInfo = extractContactInfo(contentText);
+  
+  // Extrair endereços
+  analysis.addresses = extractAddresses(contentText);
+  
+  // Extrair datas
+  analysis.dates = extractDates(contentText);
+  
+  // Extrair valores monetários
+  analysis.monetaryValues = extractMonetaryValues(contentText);
+  
+  // Extrair entidades nomeadas
+  analysis.entities = extractEntities(contentText);
+  
+  // Extrair palavras-chave importantes
+  analysis.keywords = extractKeywords(contentText);
+  
+  return analysis;
+}
+
+/**
+ * Detecta o tipo de documento baseado no conteúdo
+ */
+function detectDocumentType(contentText, filename) {
+  const content = contentText.toLowerCase();
+  const filename_lower = filename.toLowerCase();
+  
+  // Contratos
+  if (content.includes('contrato') || content.includes('termo') || 
+      content.includes('acordo') || content.includes('cláusula') ||
+      filename_lower.includes('contrato')) {
+    return 'contract';
+  }
+  
+  // Financeiro
+  if (content.includes('valor') || content.includes('preço') || 
+      content.includes('custo') || content.includes('orçamento') ||
+      content.includes('receita') || content.includes('despesa') ||
+      filename_lower.includes('financeiro') || filename_lower.includes('orcamento')) {
+    return 'financial';
+  }
+  
+  // Técnico
+  if (content.includes('especificação') || content.includes('manual') ||
+      content.includes('procedimento') || content.includes('instrução') ||
+      content.includes('técnico') || content.includes('engenharia')) {
+    return 'technical';
+  }
+  
+  // Planilha/Dados
+  if (content.includes(',') && content.includes('\n') && 
+      (content.includes('nome') || content.includes('email') || 
+       content.includes('telefone') || content.includes('data'))) {
+    return 'spreadsheet';
+  }
+  
+  return 'general';
+}
+
+/**
+ * Extrai tópicos principais do documento
+ */
+function extractMainTopics(contentText) {
+  const topics = [];
+  const lines = contentText.split('\n').filter(line => line.trim().length > 20);
+  
+  // Buscar por títulos/seções
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Títulos em maiúscula
+    if (trimmed.length < 100 && trimmed === trimmed.toUpperCase() && trimmed.length > 10) {
+      topics.push(trimmed);
+    }
+    
+    // Linhas que começam com números ou marcadores
+    if (/^[\d\.\-\*]\s/.test(trimmed) && trimmed.length < 150) {
+      topics.push(trimmed);
+    }
+    
+    // Frases que parecem ser títulos
+    if (trimmed.length < 80 && trimmed.length > 15 && 
+        !trimmed.includes('.') && !trimmed.includes(',')) {
+      topics.push(trimmed);
+    }
+  }
+  
+  return topics.slice(0, 5); // Máximo 5 tópicos
+}
+
+/**
+ * Extrai dados estruturados do documento
+ */
+function extractStructuredData(contentText) {
+  const data = [];
+  
+  // CNPJ
+  const cnpjMatches = contentText.match(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/g);
+  if (cnpjMatches) {
+    data.push({ type: 'CNPJ', values: cnpjMatches });
+  }
+  
+  // CPF
+  const cpfMatches = contentText.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/g);
+  if (cpfMatches) {
+    data.push({ type: 'CPF', values: cpfMatches });
+  }
+  
+  // Emails
+  const emailMatches = contentText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
+  if (emailMatches) {
+    data.push({ type: 'Email', values: emailMatches });
+  }
+  
+  // Telefones
+  const phoneMatches = contentText.match(/\(?\d{2}\)?\s?\d{4,5}-?\d{4}/g);
+  if (phoneMatches) {
+    data.push({ type: 'Telefone', values: phoneMatches });
+  }
+  
+  return data;
+}
+
+/**
+ * Extrai informações de contato
+ */
+function extractContactInfo(contentText) {
+  const contacts = [];
+  
+  // Nomes próprios (aproximação)
+  const namePattern = /[A-Z][a-z]+ [A-Z][a-z]+/g;
+  const names = contentText.match(namePattern);
+  if (names) {
+    contacts.push(...names.slice(0, 5));
+  }
+  
+  return contacts;
+}
+
+/**
+ * Extrai endereços
+ */
+function extractAddresses(contentText) {
+  const addresses = [];
+  
+  // Padrões de endereço
+  const addressPatterns = [
+    /Rua\s+[^,\n]+/gi,
+    /Avenida\s+[^,\n]+/gi,
+    /Alameda\s+[^,\n]+/gi,
+    /Praça\s+[^,\n]+/gi,
+    /[A-Z][a-z]+\s+\d+[^,\n]*/g
+  ];
+  
+  for (const pattern of addressPatterns) {
+    const matches = contentText.match(pattern);
+    if (matches) {
+      addresses.push(...matches.slice(0, 3));
+    }
+  }
+  
+  return addresses;
+}
+
+/**
+ * Extrai datas do documento
+ */
+function extractDates(contentText) {
+  const dates = [];
+  
+  // Padrões de data
+  const datePatterns = [
+    /\d{1,2}\/\d{1,2}\/\d{4}/g,
+    /\d{1,2}-\d{1,2}-\d{4}/g,
+    /\d{4}-\d{1,2}-\d{1,2}/g
+  ];
+  
+  for (const pattern of datePatterns) {
+    const matches = contentText.match(pattern);
+    if (matches) {
+      dates.push(...matches.slice(0, 5));
+    }
+  }
+  
+  return dates;
+}
+
+/**
+ * Extrai valores monetários
+ */
+function extractMonetaryValues(contentText) {
+  const values = [];
+  
+  // Padrões monetários
+  const monetaryPatterns = [
+    /R\$\s*[\d.,]+/g,
+    /[\d.,]+\s*reais?/gi,
+    /USD\s*[\d.,]+/g,
+    /EUR\s*[\d.,]+/g
+  ];
+  
+  for (const pattern of monetaryPatterns) {
+    const matches = contentText.match(pattern);
+    if (matches) {
+      values.push(...matches.slice(0, 5));
+    }
+  }
+  
+  return values;
+}
+
+/**
+ * Extrai entidades nomeadas (aproximação)
+ */
+function extractEntities(contentText) {
+  const entities = [];
+  
+  // Empresas (palavras em maiúscula)
+  const companyPattern = /[A-Z][A-Z\s&]+(?:LTDA|S\.A\.|S\/A|EIRELI)/g;
+  const companies = contentText.match(companyPattern);
+  if (companies) {
+    entities.push(...companies.slice(0, 3));
+  }
+  
+  return entities;
+}
+
+/**
+ * Extrai palavras-chave importantes
+ */
+function extractKeywords(contentText) {
+  const words = contentText.toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 4);
+  
+  // Contar frequência
+  const frequency = {};
+  words.forEach(word => {
+    frequency[word] = (frequency[word] || 0) + 1;
+  });
+  
+  // Retornar palavras mais frequentes
+  return Object.entries(frequency)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 10)
+    .map(([word]) => word);
+}
+
+// Funções geradoras de QA específicas
+function generateDocumentIdentificationQA(document, analysis) {
+  return {
+    question: `O que é o documento "${document.filename}"?`,
+    answer: document.description || 
+           `Este é um documento do tipo ${analysis.documentType} chamado "${document.filename}" que contém informações sobre ${analysis.mainTopics.slice(0, 2).join(' e ')}.`,
+    context: 'Identificação do documento',
     source: {
       documentId: document.id,
       filename: document.filename,
       description: document.description
     },
     generatedAt: new Date().toISOString()
-  });
-  
-  // QA 2: Sobre o conteúdo (primeira linha significativa)
-  if (lines.length > 0) {
-    const firstLine = lines[0].substring(0, 100) + (lines[0].length > 100 ? '...' : '');
-    qaPairs.push({
-      question: `Qual é o conteúdo principal do documento "${filename}"?`,
-      answer: `O documento contém: ${firstLine}`,
-      context: 'Conteúdo principal do documento',
-      source: {
-        documentId: document.id,
-        filename: document.filename,
-        description: document.description
-      },
-      generatedAt: new Date().toISOString()
-    });
-  }
-  
-  // QA 3: Sobre informações específicas (se houver dados estruturados)
-  if (contentText.includes('CNPJ') || contentText.includes('CPF')) {
-    qaPairs.push({
-      question: `Que tipo de informações de identificação estão no documento "${filename}"?`,
-      answer: `O documento contém informações de identificação como CNPJ, CPF ou outros dados cadastrais.`,
-      context: 'Informações de identificação',
-      source: {
-        documentId: document.id,
-        filename: document.filename,
-        description: document.description
-      },
-      generatedAt: new Date().toISOString()
-    });
-  }
-  
-  // Limitar ao número máximo solicitado
-  return qaPairs.slice(0, maxQuestions);
+  };
+}
+
+function generateMainContentQA(document, analysis) {
+  const topics = analysis.mainTopics.slice(0, 3).join(', ');
+  return {
+    question: `Quais são os principais tópicos abordados no documento "${document.filename}"?`,
+    answer: `O documento aborda os seguintes tópicos principais: ${topics}.`,
+    context: 'Conteúdo principal',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateContractQA(document, analysis) {
+  return {
+    question: `Que tipo de informações contratuais estão no documento "${document.filename}"?`,
+    answer: `O documento contém informações contratuais incluindo ${analysis.structuredData.map(d => d.type).join(', ')} e ${analysis.monetaryValues.length > 0 ? 'valores monetários' : 'detalhes do acordo'}.`,
+    context: 'Informações contratuais',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateFinancialQA(document, analysis) {
+  return {
+    question: `Que informações financeiras estão no documento "${document.filename}"?`,
+    answer: `O documento contém informações financeiras incluindo ${analysis.monetaryValues.slice(0, 3).join(', ')} e ${analysis.dates.length > 0 ? 'datas relevantes' : 'detalhes orçamentários'}.`,
+    context: 'Informações financeiras',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateTechnicalQA(document, analysis) {
+  return {
+    question: `Que informações técnicas estão no documento "${document.filename}"?`,
+    answer: `O documento contém informações técnicas sobre ${analysis.mainTopics.slice(0, 2).join(' e ')} com ${analysis.keywords.slice(0, 3).join(', ')}.`,
+    context: 'Informações técnicas',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateSpreadsheetQA(document, analysis) {
+  return {
+    question: `Que tipo de dados estão na planilha "${document.filename}"?`,
+    answer: `A planilha contém dados estruturados incluindo ${analysis.structuredData.map(d => d.type).join(', ')} e ${analysis.contactInfo.length > 0 ? 'informações de contato' : 'dados tabulares'}.`,
+    context: 'Dados de planilha',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateStructuredDataQA(document, analysis) {
+  const dataTypes = analysis.structuredData.map(d => d.type).join(', ');
+  return {
+    question: `Que dados estruturados estão no documento "${document.filename}"?`,
+    answer: `O documento contém os seguintes dados estruturados: ${dataTypes}.`,
+    context: 'Dados estruturados',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateContactLocationQA(document, analysis) {
+  const contacts = analysis.contactInfo.slice(0, 2).join(', ');
+  const addresses = analysis.addresses.slice(0, 1).join(', ');
+  return {
+    question: `Que informações de contato e localização estão no documento "${document.filename}"?`,
+    answer: `O documento contém informações de contato: ${contacts}${addresses ? ` e endereço: ${addresses}` : ''}.`,
+    context: 'Contato e localização',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateDatesQA(document, analysis) {
+  const dates = analysis.dates.slice(0, 3).join(', ');
+  return {
+    question: `Que datas importantes estão no documento "${document.filename}"?`,
+    answer: `O documento menciona as seguintes datas: ${dates}.`,
+    context: 'Datas importantes',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+function generateMonetaryQA(document, analysis) {
+  const values = analysis.monetaryValues.slice(0, 3).join(', ');
+  return {
+    question: `Que valores monetários estão no documento "${document.filename}"?`,
+    answer: `O documento menciona os seguintes valores: ${values}.`,
+    context: 'Valores monetários',
+    source: {
+      documentId: document.id,
+      filename: document.filename,
+      description: document.description
+    },
+    generatedAt: new Date().toISOString()
+  };
 }
 
 module.exports = { generateDocumentQA };

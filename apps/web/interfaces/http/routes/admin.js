@@ -8,6 +8,7 @@ const { PostgresDocumentsRepository } = require('../../../infra/documents/postgr
 const { PostgresKnowledgeRepository } = require('../../../infra/knowledge/postgres_knowledge_repository');
 const { OllamaClient } = require('../../../infra/llm/ollama_client');
 const { executeFineTuning } = require('../../../application/llm/finetuning');
+const { getSummaryMetrics, exportMetrics } = require('../../../application/llm/qa_metrics_tracker');
 
 const conversationsRepo = new PostgresConversationsRepository();
 const documentsRepo = new PostgresDocumentsRepository();
@@ -238,8 +239,57 @@ function handleAdminRoutes(url, req, res) {
     return handleStartFineTuningRoute(req, res);
   }
 
+  // Rotas de métricas de Q&A
+  if (url === '/api/admin/qa-metrics' && req.method === 'GET') {
+    return handleQAMetricsRoute(req, res);
+  }
+  
+  if (url === '/api/admin/qa-metrics/export' && req.method === 'GET') {
+    return handleQAMetricsExportRoute(req, res);
+  }
+
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify({ error: 'Route not found' }));
+}
+
+/**
+ * GET /api/admin/qa-metrics
+ * Obtém métricas de qualidade do Q&A
+ */
+async function handleQAMetricsRoute(req, res) {
+  try {
+    const metrics = getSummaryMetrics();
+    
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      metrics
+    }, null, 2));
+  } catch (error) {
+    console.error('Erro ao obter métricas de Q&A:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: error.message }));
+  }
+}
+
+/**
+ * GET /api/admin/qa-metrics/export
+ * Exporta métricas detalhadas de Q&A
+ */
+async function handleQAMetricsExportRoute(req, res) {
+  try {
+    const metrics = exportMetrics();
+    
+    res.writeHead(200, { 
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="qa-metrics.json"'
+    });
+    res.end(JSON.stringify(metrics, null, 2));
+  } catch (error) {
+    console.error('Erro ao exportar métricas de Q&A:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: error.message }));
+  }
 }
 
 module.exports = { handleAdminRoutes };
